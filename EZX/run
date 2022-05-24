@@ -1,0 +1,29 @@
+#!/bin/bash
+
+here=`echo $0 | sed -e 's/\/'$(basename $0)'$//'`; if [ "$here" = "`basename $0`" ]; then here="`pwd`"; fi
+. /home/native/.profile
+GAMES=/mmc/mmca1/games
+export HOME=$here
+mkdir -p /mmc/mmca1/games/logs
+
+if [ -f $GAMES/gamesrc ]; then
+   . $GAMES/gamesrc
+else
+   export LD_LIBRARY_PATH=$GAMES/lib:$LD_LIBRARY_PATH
+   #export SDL_QT_INVERT_ROTATION=1
+fi
+
+ulimit -c unlimited
+
+cd $here
+if [ ! -f "$here/ColorLines.ezx" ]; then
+	echo "ERROR: The application binary \"ColorLines.ezx\" is missing!" #> /mmc/mmca1/games/logs/ColorLines.ezx.log 2>&1
+	exit 1
+fi
+if [ "$1" = "gdb" ]; then
+	exec $GAMES/bin/gdb ColorLines.ezx core
+elif [ "$1" = "strace" ]; then
+	exec $GAMES/bin/strace $here/run
+else
+	exec $here/ColorLines.ezx #> /mmc/mmca1/games/logs/ColorLines.ezx.log 2>&1
+fi
