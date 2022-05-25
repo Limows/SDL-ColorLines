@@ -35,7 +35,7 @@ UICIMPLS =
 SRCMOC	=	
 OBJMOC	=	
 DIST	=	
-TARGET	=	ColorLines.ezx
+TARGET	=	ColorLines/ColorLines.ezx
 INTERFACE_DECL_PATH = .
 
 ####### Implicit rules
