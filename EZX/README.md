@@ -44,6 +44,7 @@ ftp> cd /mmc/mmca1/
 ftp> mput ColorLines
 ftp> quit
 ```
+or just use FileZilla :)
 
 ## Create PKG-package for Motorola E6 or A1200
 
@@ -62,8 +63,10 @@ tar -cvzf ColorLines.pkg --numeric-owner --owner=2000 --group=233 ColorLines
 ## Controls
 
  - Joystick - directions
- - Minus or Plus or Joystick center - select
- - Red Button - back to menu
+ - Camera or Plus or Joystick center - select
+ - Minus - new game
+ - Hangout - back to menu
+ - Ring - about
 
 ## Features
 
