@@ -1,13 +1,14 @@
 [Desktop Entry]
-Name=Color Lines
-Version=1.0
-Description=SDL version of Color Lines game, ported from Dingoo A320
-Comment=Ported by BruceLee, updated by Limows
-Vendor=Limows
-Exec=run
-BigIcon=ibig.png
-Icon=ismall.png
-Type=Application
-Category=Games
-Shared=2
-Name[en_GB]=Color Lines
+Name = Color Lines
+Version = 1.1
+Description = SDL version of Color Lines game, ported from Dingoo A320
+Comment = Ported by BruceLee, updated by Limows
+Vendor = Limows
+Exec = run
+BigIcon = ibig.png
+Icon = ismall.png
+Type = Application
+Category = Games
+Shared = 2
+Name[en_GB] = Color Lines
+Name[ru_RU] = Цветные Линии

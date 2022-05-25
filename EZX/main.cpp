@@ -12,18 +12,17 @@ Color Lines SDL
 #include <iostream>
 #include <fstream>
 #include <string.h>
-
 #include <SDL.h>
 
 using namespace std;
 
-
 void MenuStart();
-
+void GameStart();
+void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	0
-#define VERSION_BUILD	240522
+#define VERSION_MINOR	1
+#define VERSION_BUILD	2505
 
 #define SCREEN_WIDTH	320
 #define SCREEN_HEIGHT   240
@@ -41,6 +40,7 @@ enum GameMode
 {
 	GAMEMODE_MENU = 0,
 	GAMEMODE_PLAY = 1,
+	GAMEMODE_ABOUT = 2
 };
 
 enum BallEnum
@@ -92,6 +92,7 @@ enum SpriteEnum
 	SPRITE_NEXT_BROWN = 17,
 	SPRITECOUNT = 18
 };
+
 int SPRITECOORDS[SPRITECOUNT * 4] =
 {
 	  1,  1,  70, 94,  // SPRITE_KING
@@ -221,11 +222,9 @@ void DrawGameScreen()
 	rc.x = rc.y = 0;  rc.w = SCREEN_WIDTH; rc.h = SCREEN_HEIGHT;
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 0,0,0));
 
-	//TODO: Draw columns according to score
+	// Draw board and sprites
 	DrawSprite(SPRITE_KING, -24, 75);
 	DrawSprite(SPRITE_PRETENDER, SCREEN_WIDTH - 42, 75);
-
-	// Draw board
 	rc.x = POSX_BOARD_LEFT;  rc.y = POSY_BOARD_TOP;
 	rc.w = rc.h = 24 * 9 + 4;
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 173,170,173));
@@ -257,6 +256,10 @@ void DrawGameScreen()
 	DrawText(0, 2, buf);
 	sprintf(buf, "% 6d", g_Score);
 	DrawText(SCREEN_WIDTH - FONT_WIDTH * 6, 2, buf);
+
+	// Draw names
+	DrawText(0, SCREEN_HEIGHT - FONT_HEIGHT, "King");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 3), SCREEN_HEIGHT - FONT_HEIGHT, "You");
 
 	// Draw next colors
 	DrawText(POSX_NEXT_LEFT - FONT_WIDTH * 6, 2, "Next:");
@@ -333,27 +336,38 @@ void SaveScore(int score)
 {
 	char cwd[PATH_MAX];
 
-   	if (getcwd(cwd, sizeof(cwd)) != NULL) 
+	if (g_Score > g_KingScore)
 	{
-    	ofstream save;
-  		save.open(strcat(cwd, "/save.file"));
-  		save << score << endl;
-  		save.close();
-   	} 
+   		if (getcwd(cwd, sizeof(cwd)) != NULL) 
+		{
+    		ofstream save;
+
+  			save.open(strcat(cwd, "/save.file"));
+  			save << score << endl;
+  			save.close();
+   		} 
+		else return;
+	}
 	else return;
 }
 
 int LoadScore()
 {
 	char cwd[PATH_MAX];
-	int score;
+	int score = 100;
 
    	if (getcwd(cwd, sizeof(cwd)) != NULL) 
 	{	
 		ifstream save;
-  		save.open(strcat(cwd, "/save.file"));
-  		save >> score;
-  		save.close();
+
+  		save.open(strcat(cwd, "/score.file"));
+
+		if(save.is_open())
+		{
+  			save >> score;
+  			save.close();
+		}
+		else return 100;
 
 		if (score > 100) return score;
 		else return 100;
@@ -361,12 +375,59 @@ int LoadScore()
 	else return 100;
 }
 
-void GameStart()
+bool SaveGame()
 {
+	char cwd[PATH_MAX];
+
+   	if (getcwd(cwd, sizeof(cwd)) != NULL) 
+	{
+    	ofstream save;
+
+  		save.open(strcat(cwd, "/score.file"));
+		save << g_Score << endl;
+		save.close();
+	}
+	else return false;
+
+	return true;
+}
+
+bool LoadGame()
+{
+	char cwd[PATH_MAX];
+	int score = 0;
+
+   	if (getcwd(cwd, sizeof(cwd)) != NULL) 
+	{	
+		ifstream save;
+
+  		save.open(strcat(cwd, "/save.file"));
+		
+		if(save.is_open())
+		{
+  			save >> score;
+  			save.close();
+
+			g_Score = score;
+			GameStart();
+			return true;
+		}
+		else return false;
+   	} 
+	else return false;
+}
+
+void Init()
+{	
 	// Clear board
 	memset(g_Board, 0, sizeof(g_Board));
+
 	// Clear score
 	g_Score = 0;
+}
+
+void GameStart()
+{
 	g_KingScore = LoadScore();
 	g_TileCursorX = g_TileCursorY = 4;  // Cursor to center of the board
 	g_okShowTileCursor = 0;  // Hide cursor
@@ -597,7 +658,7 @@ int GameCheckToRemove()
 	for (c = 0; c < bestcount; c++)
 	{
 		g_Board[i][j] = BALL_NONE;
-		g_Score += 10;
+		g_Score += 2;
 
 		DrawGameScreen();
 		SDL_Flip(g_pSurface);
@@ -652,19 +713,25 @@ void TakeAction(int i, int j)
 bool ClickAt(int x, int y) 
 {
 	int i, j;
-	for(i=0; i<9;i++) for(j=0; j<9;j++) if(ClickOnTile(x, y, i, j)) { TakeAction(i, j); return true; }
+
+	for(i=0; i<9;i++) for(j=0; j<9;j++)
+		if(ClickOnTile(x, y, i, j)) 
+		{ 
+			TakeAction(i, j); return true; 
+		}
+
 	return false;
 }
 
 void GameProcessEvent(SDL_Event evt)
-{
+{	
 	if (evt.type == SDL_KEYDOWN)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_PAUSE:   // CAMERA
-			g_okQuit = 1;
-			SaveScore(g_Score);
+		case SDLK_MINUS:	// MINUS
+			Init();
+			GameStart();
 			break;
 		case SDLK_ESCAPE:  // HANGUP
 			MenuStart();
@@ -686,9 +753,12 @@ void GameProcessEvent(SDL_Event evt)
 			g_TileCursorY++;
 			if (g_TileCursorY >= 9) g_TileCursorY = 0;
 			break;
+		case SDLK_SPACE: // RING
+			AboutStart();
+			break;
+		case SDLK_RETURN:	// ENTER
+		case SDLK_PAUSE:   // CAMERA
 		case SDLK_PLUS:   	// PLUS
-		case SDLK_MINUS:	// MINUS
-		case SDLK_RETURN:	// FIRE
 			if (g_Board[g_TileCursorY][g_TileCursorX] == BALL_NONE)
 			{
 				if (g_TileSelectX >= 0 && g_TileSelectY >= 0)  // We have selection and user selects the destination
@@ -733,10 +803,10 @@ void MenuStart()
 	SDL_Surface *tempSurface;
 	SDL_Surface *pSurfaceTitle;
 	SDL_Rect src, dest;
-	char buffer[20];
 
 	// Show title screen
 	tempSurface = SDL_LoadBMP("ColorLinesData/title.bmp");
+
 	if (tempSurface != NULL)
 	{
 		pSurfaceTitle = SDL_DisplayFormat(tempSurface);
@@ -751,14 +821,50 @@ void MenuStart()
 		SDL_FreeSurface(pSurfaceTitle);
 	}
 
-	sprintf(buffer, "v%d.%d", VERSION_MAJOR, VERSION_MINOR);
-	DrawText(0,0, buffer);
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 37)/2, 203, "Ported by BruceLee, updated by Limows");
-	DrawText((SCREEN_WIDTH-FONT_WIDTH*28)/2, 224, "Touch the screen to continue");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 26)/2, (SCREEN_HEIGHT - FONT_HEIGHT * 2), "Touch the screen to start");
 
 	SDL_Flip(g_pSurface);
 
 	g_GameMode = GAMEMODE_MENU;
+}
+
+void AboutStart()
+{
+	SDL_Surface *tempSurface;
+	SDL_Surface *pSurfaceTitle;
+	SDL_Rect src, dest;
+	char buffer[20];
+
+	// Show about screen
+	tempSurface = SDL_LoadBMP("ColorLinesData/about.bmp");
+
+	if (tempSurface != NULL)
+	{
+		pSurfaceTitle = SDL_DisplayFormat(tempSurface);
+		SDL_FreeSurface(tempSurface);
+
+		src.x = 0;  src.y = 0;
+		src.w = SCREEN_WIDTH; src.h = SCREEN_HEIGHT;
+		dest.x = 0;  dest.y = 0;
+		dest.w = SCREEN_WIDTH; dest.h = SCREEN_HEIGHT;
+		SDL_BlitSurface(pSurfaceTitle, &src, g_pSurface, &dest);
+
+		SDL_FreeSurface(pSurfaceTitle);
+	}
+
+	// Draw info
+	sprintf(buffer, "Version: %d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD);
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 17)/2, 34 + FONT_HEIGHT, buffer);
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 32)/2, 34 + FONT_HEIGHT * 3, "This game was originally written");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 33)/2, 34 + FONT_HEIGHT * 4 + 2, "for DOS in 1992. The goal of game");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 29)/2, 34 + FONT_HEIGHT * 5 + 2, "is to score as many points as");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 30)/2, 34 + FONT_HEIGHT * 6 + 2, "possible by matching the balls");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 23)/2, 34 + FONT_HEIGHT * 7 + 2, "in lines of 5 or more.");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 31)/2, 34 + FONT_HEIGHT * 9, "EZX port by BruceLee and Limows");
+
+	SDL_Flip(g_pSurface);
+
+	g_GameMode = GAMEMODE_ABOUT;
 }
 
 void MenuProcessEvent(SDL_Event evt)
@@ -767,21 +873,44 @@ void MenuProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_ESCAPE:  // SELECT button on Dingoo
+		case SDLK_ESCAPE:  // HANGUP
 			g_okQuit = 1;
 			break;
-		case SDLK_PLUS:   // A button on Dingoo
-		case SDLK_MINUS:	// B button on Dingoo
-		case SDLK_RETURN:
+		case SDLK_PLUS:   // PLUS
+		case SDLK_MINUS:	// MINUS
+		case SDLK_RETURN:	// ENTER
+			Init();
 			GameStart();
 			break;
 		default:  // Do nothing
 			break;
 		}
 	} else
-	if (evt.type == SDL_MOUSEBUTTONDOWN)
+	if (evt.type == SDL_MOUSEBUTTONDOWN) // TOUCH
 	{
-		if(evt.button.button==SDL_BUTTON_LEFT) GameStart();
+		if(evt.button.button==SDL_BUTTON_LEFT)
+		{	
+			Init();
+			GameStart();
+		}
+	}
+}
+
+void AboutProcessEvent(SDL_Event evt)
+{
+	if (evt.type == SDL_KEYDOWN)
+	{
+		switch (evt.key.keysym.sym)
+		{
+		case SDLK_ESCAPE:  // HANGUP
+		case SDLK_PLUS:   // PLUS
+		case SDLK_MINUS:	// MINUS
+		case SDLK_RETURN:	// ENTER
+			GameStart();
+			break;
+		default:  // Do nothing
+			break;
+		}
 	}
 }
 
@@ -826,11 +955,21 @@ int main(int argc, char * argv[])
 				break;
 			}
 			else
-			{
-				if (g_GameMode == GAMEMODE_MENU)
-					MenuProcessEvent(evt);
-				else
-					GameProcessEvent(evt);
+			{	
+				switch (g_GameMode)
+				{
+					case GAMEMODE_MENU:
+						MenuProcessEvent(evt);
+						break;
+					case GAMEMODE_PLAY:
+						GameProcessEvent(evt);
+						break;
+					case GAMEMODE_ABOUT:
+						AboutProcessEvent(evt);
+						break;
+					default:
+						break;
+				}
 			}
 		}
 
