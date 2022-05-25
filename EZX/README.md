@@ -57,7 +57,7 @@ tar -cvzf ColorLines.pkg ColorLines
 MPKG:
 
 ```sh
-tar -cvzf ColorLines.pkg --numeric-owner --owner=2000 --group=233 ColorLines
+tar -cvzf ColorLines.mpkg --numeric-owner --owner=2000 --group=233 ColorLines
 ```
 
 ## Controls
@@ -65,7 +65,7 @@ tar -cvzf ColorLines.pkg --numeric-owner --owner=2000 --group=233 ColorLines
  - Joystick - directions
  - Camera or Plus or Joystick center - select
  - Minus - new game
- - Hangout - back to menu
+ - Hangup - back to menu
  - Ring - about
 
 ## Features
