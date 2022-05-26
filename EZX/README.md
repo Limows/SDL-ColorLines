@@ -78,8 +78,8 @@ tar -cvzf ColorLines.mpkg --numeric-owner --owner=2000 --group=233 ColorLines
 
 ## Screenshots
 
-- Running on Motorola A1200:
+- On Motorola A1200:
 
-![EZX_title](screenshots/title.jpg)
-![EZX_game](screenshots/game.jpg)
-![EZX_about](screenshots/about.jpg)
+![EZX_title](screenshots/title.png)
+![EZX_game](screenshots/game.png)
+![EZX_about](screenshots/about.png)

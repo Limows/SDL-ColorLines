@@ -1,0 +1,8 @@
+# Build results
+*.o
+*.ezx
+*.dge
+*.exe
+
+# Libraries
+*.dll
