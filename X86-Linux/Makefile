@@ -38,10 +38,10 @@ INTERFACE_DECL_PATH = .
 .SUFFIXES: .cpp .cxx .cc .C .c
 
 .cpp.o:
-	$(CXX) -c $(INCPATH) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
 .cxx.o:
-	$(CXX) -c $(INCPATH) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
 .cc.o:
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<

@@ -14,7 +14,7 @@ SDK_SDL_INC_DIR = $(RZX50PATH)/usr/include/SDL
 CC	=	mipsel-linux-gcc
 CXX	=	mipsel-linux-g++
 CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -mips32 -mtune=mips32 -DNO_DEBUG
-CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -DQWS -fno-exceptions -fno-rtti -Wall -W -O2 -mips32 -mtune=mips32 -DNO_DEBUG
+CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W -O2 -mips32 -mtune=mips32 -DNO_DEBUG
 INCPATH	=	-I $(SDK_USR_INC_DIR) -I $(SDK_SDL_INC_DIR) -I $(SDK_INC_DIR)
 LINK	=	mipsel-linux-g++
 LFLAGS	=	`sdl-config --libs`
@@ -42,10 +42,10 @@ INTERFACE_DECL_PATH = .
 .SUFFIXES: .cpp .cxx .cc .C .c
 
 .cpp.o:
-	$(CXX) -c $(INCPATH) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
 .cxx.o:
-	$(CXX) -c $(INCPATH) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
 .cc.o:
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<

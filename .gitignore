@@ -7,3 +7,10 @@
 
 # Libraries
 *.dll
+
+# Packages
+*.pkg
+*.mpkg
+*.tar.gz
+*.deb
+*.rpm

@@ -29,10 +29,10 @@ Use usb mini cable, or just copy ColorLines folder to SD card
 ## Controls
 
  - Joystick - directions
- - Start center - select
- - - new game
+ - A - select
+ - Y - new game
  - Select - back to menu
- - X - about
+ - Start - about
 
 ## Features
 
