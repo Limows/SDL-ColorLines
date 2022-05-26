@@ -3,6 +3,7 @@
 *.ezx
 *.dge
 *.exe
+*.elf
 
 # Libraries
 *.dll

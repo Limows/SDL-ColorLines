@@ -7,19 +7,19 @@
 
 ####### Compiler, tools and options
 
-SDK_EZX_LIB_DIR = $(MOTOEZXPATH)/lib
-SDK_INC_DIR = $(MOTOEZXPATH)/include
-SDK_SDL_INC_DIR = $(MOTOEZXPATH)/include/SDL
-CC	=	arm-linux-gnu-gcc
-CXX	=	arm-linux-gnu-g++
-CFLAGS	=	-pipe `sdl-config --cflags` -Wall -W -O2 -mcpu=iwmmxt -mtune=iwmmxt -DNO_DEBUG
-CXXFLAGS=	-pipe `sdl-config --cflags` -DQWS -fno-exceptions -fno-rtti -Wall -W -O2 -mcpu=iwmmxt -mtune=iwmmxt -DNO_DEBUG
-INCPATH	=	-I $(SDK_INC_DIR) -I $(SDK_SDL_INC_DIR)
-LINK	=	arm-linux-gnu-g++
+SDK_LIB_DIR = $(RZX50PATH)/lib
+SDK_INC_DIR = $(RZX50PATH)/include
+SDK_USR_LIB_DIR = $(RZX50PATH)/usr/lib
+SDK_USR_INC_DIR = $(RZX50PATH)/usr/include
+SDK_SDL_INC_DIR = $(RZX50PATH)/usr/include/SDL
+CC	=	mipsel-linux-gcc
+CXX	=	mipsel-linux-g++
+CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -mips32 -mtune=mips32 -DNO_DEBUG
+CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -DQWS -fno-exceptions -fno-rtti -Wall -W -O2 -mips32 -mtune=mips32 -DNO_DEBUG
+INCPATH	=	-I $(SDK_USR_INC_DIR) -I $(SDK_SDL_INC_DIR) -I $(SDK_INC_DIR)
+LINK	=	mipsel-linux-g++
 LFLAGS	=	`sdl-config --libs`
-LIBS	=	$(SUBLIBS) -L $(SDK_EZX_LIB_DIR) -lSDL -lSDLmain -lezxappbase -lpthread -lz -lfreetype -lSDL_mixer -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
-MOC	=	$(QTDIR)/bin/moc
-UIC	=	$(QTDIR)/bin/uic
+LIBS	=  -L $(SDK_LIB_DIR) -L $(SDK_USR_LIB_DIR) -lSDL -lSDLmain -lpthread -lz -lfreetype -lSDL_mixer -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
 
 TAR	=	tar -cf
 GZIP	=	gzip -9f
@@ -33,9 +33,9 @@ INTERFACES =
 UICDECLS =	
 UICIMPLS =	
 SRCMOC	=	
-OBJMOC	=	
+OBJMOC	=
 DIST	=	
-TARGET	=	ColorLines/ColorLines.ezx
+TARGET	=	ColorLines/ColorLines.dge
 INTERFACE_DECL_PATH = .
 
 ####### Implicit rules
@@ -43,10 +43,10 @@ INTERFACE_DECL_PATH = .
 .SUFFIXES: .cpp .cxx .cc .C .c
 
 .cpp.o:
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+	$(CXX) -c $(INCPATH) -o $@ $<
 
 .cxx.o:
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+	$(CXX) -c $(INCPATH) -o $@ $<
 
 .cc.o:
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
@@ -65,8 +65,8 @@ $(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
 
 dist:
-	$(TAR) ColorLines.ezx.tar ColorLines.ezx.pro $(SOURCES) $(HEADERS) $(INTERFACES) $(DIST)
-	$(GZIP) ColorLines.ezx.tar
+	$(TAR) ColorLines.dge.tar $(SOURCES) $(HEADERS) $(INTERFACES) $(DIST)
+	$(GZIP) ColorLines.dge.tar
 
 clean:
 	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS) $(TARGET)
