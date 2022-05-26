@@ -22,9 +22,9 @@ make
 
  - Cursor keys - directions
  - Enter - select
- -  - new game
+ - F1 - new game
  - ESC - back to menu
- - Space - about
+ - F12 - about
 
 ## Features
 

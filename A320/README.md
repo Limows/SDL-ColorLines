@@ -1,6 +1,6 @@
 # SDL-ColorLines
 
-Ritmix RZX50 version, ported by Limows with EXL help
+Original nzimin version with updates
 
 ## Toolchain & SDK
 
@@ -12,12 +12,12 @@ Debian Recipe:
 
 ```sh
 sudo mkdir /opt/toolchains/
-sudo tar -C /opt/toolchains/ -xzvf ~/Downloads/rzx50_sdk.zip
+sudo tar -C /opt/toolchains/ -xzvf ~/Downloads/a320_sdk.zip
 
 cd ~/Projects/
 git clone https://github.com/Limows/SDL-ColorLines
-cd SDL-ColorLines/RZX50/
-. /opt/toolchains/mipsel-linux-uclibc/setenv-rzx.sh
+cd SDL-ColorLines/A320/
+. /opt/toolchains/a320/setenv-a320.sh
 make clean
 make
 ```
@@ -29,10 +29,10 @@ Use usb mini cable, or just copy ColorLines folder to SD card
 ## Controls
 
  - Joystick - directions
- - A - select
- - Y - new game
+ - Start center - select
+ - - new game
  - Select - back to menu
- - Start - about
+ - X - about
 
 ## Features
 
@@ -40,6 +40,6 @@ Use usb mini cable, or just copy ColorLines folder to SD card
 
 ## Screenshots
 
-![RZX_title](screenshots/title.png)
-![RZX_game](screenshots/game.png)
-![RZX_about](screenshots/about.png)
+![A320_title](screenshots/title.png)
+![A320_game](screenshots/game.png)
+![A320_about](screenshots/about.png)

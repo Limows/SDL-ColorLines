@@ -342,7 +342,7 @@ void SaveScore(int score)
 		{
     		ofstream save;
 
-  			save.open(strcat(cwd, "/save.file"));
+  			save.open(strcat(cwd, "/score.file"));
   			save << score << endl;
   			save.close();
    		} 
@@ -383,7 +383,7 @@ bool SaveGame()
 	{
     	ofstream save;
 
-  		save.open(strcat(cwd, "/score.file"));
+  		save.open(strcat(cwd, "/save.file"));
 		save << g_Score << endl;
 		save.close();
 	}

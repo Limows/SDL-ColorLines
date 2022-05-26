@@ -1,6 +1,6 @@
 #############################################################################
-# Makefile for building ColorLines.dge
-#    Project: ColorLines.dge
+# Makefile for building ColorLines.elf
+#     Project: ColorLines.elf
 #    Template: app
 #############################################################################
 
@@ -34,7 +34,7 @@ UICIMPLS =
 SRCMOC	=	
 OBJMOC	=
 DIST	=	
-TARGET	=	ColorLines/ColorLines.dge
+TARGET	=	ColorLines/ColorLines.elf
 INTERFACE_DECL_PATH = .
 
 ####### Implicit rules

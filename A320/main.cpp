@@ -24,17 +24,17 @@ void AboutStart();
 #define VERSION_MINOR	1
 #define VERSION_BUILD	2505
 
-#define SCREEN_WIDTH	480
-#define SCREEN_HEIGHT   272
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT   240
 
 #define FONT_WIDTH		  8
 #define FONT_HEIGHT		 16
 
-#define POSX_BOARD_LEFT	 127
+#define POSX_BOARD_LEFT	 50
 #define POSX_TILES_LEFT	 (POSX_BOARD_LEFT + 2)
-#define POSY_BOARD_TOP	 32
-#define POSY_TILES_TOP	 (POSY_BOARD_TOP + 2)
-#define POSX_NEXT_LEFT	 (POSX_BOARD_LEFT + 110)
+#define POSY_BOARD_TOP	  18
+#define POSY_TILES_TOP	  (POSY_BOARD_TOP + 2)
+#define POSX_NEXT_LEFT	  (POSX_BOARD_LEFT + 110)
 
 #define PATH_MAX	50
 
@@ -344,7 +344,7 @@ void SaveScore(int score)
 		{
     		ofstream save;
 
-  			save.open(strcat(cwd, "/score.file"));
+  			save.open(strcat(cwd, "/save.file"));
   			save << score << endl;
   			save.close();
    		} 
@@ -385,7 +385,7 @@ bool SaveGame()
 	{
     	ofstream save;
 
-  		save.open(strcat(cwd, "/save.file"));
+  		save.open(strcat(cwd, "/score.file"));
 		save << g_Score << endl;
 		save.close();
 	}
@@ -731,11 +731,12 @@ void GameProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_F1:	// F1
+		case SDLK_LMETA:
+		case SDLK_LSHIFT:	// Y key
 			Init();
 			GameStart();
 			break;
-		case SDLK_ESCAPE:  // ESC
+		case SDLK_ESCAPE:  // SELECT
 			MenuStart();
 			SaveScore(g_Score);
 			break;
@@ -755,10 +756,10 @@ void GameProcessEvent(SDL_Event evt)
 			g_TileCursorY++;
 			if (g_TileCursorY >= 9) g_TileCursorY = 0;
 			break;
-		case SDLK_F12: // F12
+		case SDLK_RETURN: // START
 			AboutStart();
 			break;
-		case SDLK_RETURN:	// ENTER
+		case SDLK_LCTRL:	// A key
 			if (g_Board[g_TileCursorY][g_TileCursorX] == BALL_NONE)
 			{
 				if (g_TileSelectX >= 0 && g_TileSelectY >= 0)  // We have selection and user selects the destination
@@ -803,12 +804,6 @@ void MenuStart()
 	SDL_Surface *tempSurface;
 	SDL_Surface *pSurfaceTitle;
 	SDL_Rect src, dest;
-	int vAlign = (SCREEN_HEIGHT - 240)/2;
-	int hAlign = (SCREEN_WIDTH - 320)/2;
-	int vTextAlign = vAlign + 34;
-
-	//Clear screen
-	SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, 0);
 
 	// Show title screen
 	tempSurface = SDL_LoadBMP("ColorLinesData/title.bmp");
@@ -820,8 +815,8 @@ void MenuStart()
 
 		src.x = 0;  src.y = 0;
 		src.w = SCREEN_WIDTH; src.h = SCREEN_HEIGHT;
-		dest.x = hAlign;  dest.y = vAlign;
-		dest.w = 320; dest.h = 240;
+		dest.x = 0;  dest.y = 0;
+		dest.w = SCREEN_WIDTH; dest.h = SCREEN_HEIGHT;
 		SDL_BlitSurface(pSurfaceTitle, &src, g_pSurface, &dest);
 
 		SDL_FreeSurface(pSurfaceTitle);
@@ -840,9 +835,6 @@ void AboutStart()
 	SDL_Surface *pSurfaceTitle;
 	SDL_Rect src, dest;
 	char buffer[20];
-	int vAlign = (SCREEN_HEIGHT - 240)/2;
-	int hAlign = (SCREEN_WIDTH - 320)/2;
-	int vTextAlign = vAlign + 34;
 
 	// Show about screen
 	tempSurface = SDL_LoadBMP("ColorLinesData/about.bmp");
@@ -854,8 +846,8 @@ void AboutStart()
 
 		src.x = 0;  src.y = 0;
 		src.w = SCREEN_WIDTH; src.h = SCREEN_HEIGHT;
-		dest.x = hAlign;  dest.y = vAlign;
-		dest.w = 320; dest.h = 240;
+		dest.x = 0;  dest.y = 0;
+		dest.w = SCREEN_WIDTH; dest.h = SCREEN_HEIGHT;
 		SDL_BlitSurface(pSurfaceTitle, &src, g_pSurface, &dest);
 
 		SDL_FreeSurface(pSurfaceTitle);
@@ -863,13 +855,13 @@ void AboutStart()
 
 	// Draw info
 	sprintf(buffer, "Version: %d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD);
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 17)/2, vTextAlign + FONT_HEIGHT, buffer);
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 32)/2, vTextAlign + FONT_HEIGHT * 3, "This game was originally written");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 33)/2, vTextAlign + FONT_HEIGHT * 4 + 2, "for DOS in 1992. The goal of game");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 29)/2, vTextAlign + FONT_HEIGHT * 5 + 2, "is to score as many points as");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 30)/2, vTextAlign + FONT_HEIGHT * 6 + 2, "possible by matching the balls");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 23)/2, vTextAlign + FONT_HEIGHT * 7 + 2, "in lines of 5 or more.");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 18)/2, vTextAlign + FONT_HEIGHT * 9, "x86 port by Limows");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 17)/2, 34 + FONT_HEIGHT, buffer);
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 32)/2, 34 + FONT_HEIGHT * 3, "This game was originally written");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 33)/2, 34 + FONT_HEIGHT * 4 + 2, "for DOS in 1992. The goal of game");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 29)/2, 34 + FONT_HEIGHT * 5 + 2, "is to score as many points as");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 30)/2, 34 + FONT_HEIGHT * 6 + 2, "possible by matching the balls");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 23)/2, 34 + FONT_HEIGHT * 7 + 2, "in lines of 5 or more.");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 31)/2, 34 + FONT_HEIGHT * 9, "EZX port by BruceLee and Limows");
 
 	SDL_Flip(g_pSurface);
 
@@ -882,7 +874,7 @@ void MenuProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_ESCAPE:  // ESC
+		case SDLK_ESCAPE:  // HANGUP
 			g_okQuit = 1;
 			break;
 		case SDLK_RETURN:	// ENTER
@@ -926,7 +918,7 @@ int main(int argc, char * argv[])
 	// Prepare screen surface
 	g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
 	if (g_pSurface == NULL) return 254;  // Unable to set video mode
-	SDL_ShowCursor(SDL_ENABLE);
+	SDL_ShowCursor(SDL_DISABLE);
 
 	// Load font
 	tempSurface = SDL_LoadBMP("ColorLinesData/font.bmp");
