@@ -21,8 +21,8 @@ void GameStart();
 void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	1
-#define VERSION_BUILD	2505
+#define VERSION_MINOR	2
+#define VERSION_BUILD	2605
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   272

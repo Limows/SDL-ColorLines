@@ -21,8 +21,8 @@ void GameStart();
 void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	1
-#define VERSION_BUILD	2505
+#define VERSION_MINOR	2
+#define VERSION_BUILD	2605
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   272
@@ -30,7 +30,7 @@ void AboutStart();
 #define FONT_WIDTH		  8
 #define FONT_HEIGHT		 16
 
-#define POSX_BOARD_LEFT	 127
+#define POSX_BOARD_LEFT	 130
 #define POSX_TILES_LEFT	 (POSX_BOARD_LEFT + 2)
 #define POSY_BOARD_TOP	 32
 #define POSY_TILES_TOP	 (POSY_BOARD_TOP + 2)
