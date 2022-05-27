@@ -740,12 +740,12 @@ void GameProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_LMETA:
 		case SDLK_LSHIFT:	// Y key
 			Init();
 			GameStart();
 			break;
 		case SDLK_ESCAPE:  // SELECT
+			Mix_PauseMusic();
 			MenuStart();
 			SaveScore(g_Score);
 			break;
@@ -889,7 +889,7 @@ void MenuProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_ESCAPE:  // HANGUP
+		case SDLK_ESCAPE:  // SELECT
 			g_okQuit = 1;
 			break;
 		case SDLK_RETURN:	// ENTER

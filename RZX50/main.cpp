@@ -745,6 +745,7 @@ void GameProcessEvent(SDL_Event evt)
 			GameStart();
 			break;
 		case SDLK_ESCAPE:  // SELECT
+			Mix_PauseMusic();
 			MenuStart();
 			SaveScore(g_Score);
 			break;
@@ -942,7 +943,7 @@ int main(int argc, char * argv[])
 	if( SDL_Init(SDL_INIT_AUDIO) < 0) return 254; // Unable to initialize SDL audio
 
 	// Setup audio mode
-	Mix_OpenAudio(22050,AUDIO_S16,2,512);
+	Mix_OpenAudio(44100,AUDIO_S16,2,512);
 	g_Music = Mix_LoadMUS("ColorLinesData/music.wav");
 	g_Intro = Mix_LoadMUS("ColorLinesData/intro.wav");
 

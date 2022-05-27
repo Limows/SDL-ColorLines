@@ -4,7 +4,7 @@ Ritmix RZX50 version, ported by Limows with EXL help
 
 ## Toolchain & SDK
 
-TODO: Add link to SDK
+Download SDK from original [site](http://old.ritmixrussia.ru/products/rzx-50)
 
 ## Install Tools & Build
 
@@ -31,12 +31,14 @@ Use usb mini cable, or just copy ColorLines folder to SD card
  - Joystick - directions
  - A - select
  - Y - new game
+ - X - pause music
  - Select - back to menu
  - Start - about
 
 ## Features
 
  - Game save your score automatically
+ - Music
 
 ## Screenshots
 

@@ -22,13 +22,15 @@ make
 
  - Cursor keys - directions
  - Enter - select
- - F1 - new game
+ - F6 - new game
+ - F2 - pause music
  - ESC - back to menu
- - F12 - about
+ - F4 - about
 
 ## Features
 
  - Game save your score automatically
+ - Music
 
 ## Tested devices
 

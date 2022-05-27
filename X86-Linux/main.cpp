@@ -23,8 +23,8 @@ void GameStart();
 void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	2
-#define VERSION_BUILD	2605
+#define VERSION_MINOR	3
+#define VERSION_BUILD	2705
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   272
@@ -747,6 +747,7 @@ void GameProcessEvent(SDL_Event evt)
 			GameStart();
 			break;
 		case SDLK_ESCAPE:  // ESC
+			Mix_PauseMusic();
 			MenuStart();
 			SaveScore(g_Score);
 			break;
@@ -845,7 +846,7 @@ void MenuStart()
 		SDL_FreeSurface(pSurfaceTitle);
 	}
 
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 26)/2, (SCREEN_HEIGHT - FONT_HEIGHT * 2), "Touch the screen to start");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 20)/2, (SCREEN_HEIGHT - FONT_HEIGHT * 2), "Press Enter to start");
 
 	SDL_Flip(g_pSurface);
 
