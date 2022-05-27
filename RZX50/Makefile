@@ -28,12 +28,11 @@ GZIP	=	gzip -9f
 HEADERS =	
 SOURCES =	main.cpp
 OBJECTS =	main.o
-INTERFACES =	
-UICDECLS =	
-UICIMPLS =	
+INTERFACES =
+PLATFORM = RZX50
 SRCMOC	=	
 OBJMOC	=
-DIST	=	
+APPDIR	=	ColorLines
 TARGET	=	ColorLines/ColorLines.dge
 INTERFACE_DECL_PATH = .
 
@@ -64,11 +63,11 @@ $(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
 
 dist:
-	$(TAR) ColorLines.dge.tar $(SOURCES) $(HEADERS) $(INTERFACES) $(DIST)
-	$(GZIP) ColorLines.dge.tar
+	$(TAR) $(APPDIR)-$(PLATFORM).tar $(APPDIR)
+	$(GZIP) $(APPDIR)-$(PLATFORM).tar
 
 clean:
-	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS) $(TARGET)
+	-rm -f $(OBJECTS) $(TARGET) $(APPDIR)-$(PLATFORM).tar.gz
 	-rm -f *~ core
 
 ####### Sub-libraries

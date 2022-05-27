@@ -13,6 +13,7 @@ Color Lines SDL
 #include <fstream>
 #include <string.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_mixer.h>
 
 using namespace std;
 
@@ -21,8 +22,8 @@ void GameStart();
 void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	2
-#define VERSION_BUILD	2605
+#define VERSION_MINOR	3
+#define VERSION_BUILD	2705
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   272
@@ -37,6 +38,7 @@ void AboutStart();
 #define POSX_NEXT_LEFT	 (POSX_BOARD_LEFT + 110)
 
 #define PATH_MAX	50
+#define MAX_INT		65535
 
 enum GameMode
 {
@@ -61,6 +63,9 @@ enum BallEnum
 SDL_Surface *g_pSurface = NULL;
 SDL_Surface *g_pSprites = NULL;
 SDL_Surface *g_pFont = NULL;
+Mix_Music *g_Music;
+Mix_Music *g_Intro;
+Mix_Chunk *g_Bouncing;
 enum GameMode g_GameMode = GAMEMODE_MENU;
 int g_okQuit = 0;
 int g_Board[9][9];
@@ -225,8 +230,8 @@ void DrawGameScreen()
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 0,0,0));
 
 	// Draw board and sprites
-	DrawSprite(SPRITE_KING, -20, 75);
-	DrawSprite(SPRITE_PRETENDER, SCREEN_WIDTH - 46, 75);
+	DrawSprite(SPRITE_KING, 20, 75);
+	DrawSprite(SPRITE_PRETENDER, SCREEN_WIDTH - 86, 75);
 	rc.x = POSX_BOARD_LEFT;  rc.y = POSY_BOARD_TOP;
 	rc.w = rc.h = 24 * 9 + 4;
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 173,170,173));
@@ -255,13 +260,13 @@ void DrawGameScreen()
 
 	// Draw score
 	sprintf(buf, "%d", g_KingScore);
-	DrawText(2, 2, buf);
+	DrawText(35, 2, buf);
 	sprintf(buf, "% 6d", g_Score);
-	DrawText(SCREEN_WIDTH - FONT_WIDTH * 6 - 4, 2, buf);
+	DrawText(SCREEN_WIDTH - FONT_WIDTH * 6 - 35, 2, buf);
 
 	// Draw names
-	DrawText(2, SCREEN_HEIGHT - FONT_HEIGHT, "King");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 3) - 4, SCREEN_HEIGHT - FONT_HEIGHT, "You");
+	DrawText(35, 75 + 94 + 10, "King");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 9 - 14), 75 + 94 + 10, "Pretender");
 
 	// Draw next colors
 	DrawText(POSX_NEXT_LEFT - FONT_WIDTH * 6, 2, "Next:");
@@ -310,19 +315,20 @@ void GamePutRandomBall(int freecount)
 
 bool GamePutThreeRandomBalls()
 {
-	int i, freecount;
+	int freecount = 0, n = 3;
 	int *pBoard;
 
 	pBoard = (int*)g_Board;
-	freecount = 0;
 
-	for (i = 0; i < 9 * 9; i++)
+	for (int i = 0; i < 9 * 9; i++)
 	{
 		if (*(pBoard + i) == BALL_NONE)
 			freecount++;
 	}
 
-	for (i = 0; i < 3; i++)
+	if (freecount < 3) n = freecount;
+
+	for (int i = 0; i < n; i++)
 	{
 		GamePutRandomBall(freecount--);
 		DrawGameScreen();
@@ -330,7 +336,7 @@ bool GamePutThreeRandomBalls()
 		SDL_Delay(100);
 	}
 
-	if (freecount == 0) return false; // No place to put a ball
+	if (freecount <= 0) return false; // No place to put a ball
 	else return true;
 }
 
@@ -426,6 +432,9 @@ void Init()
 
 	// Clear score
 	g_Score = 0;
+
+	//Start music
+	Mix_PlayMusic(g_Music, MAX_INT);
 }
 
 void GameStart()
@@ -731,7 +740,6 @@ void GameProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_LMETA:
 		case SDLK_LSHIFT:	// Y key
 			Init();
 			GameStart();
@@ -758,6 +766,12 @@ void GameProcessEvent(SDL_Event evt)
 			break;
 		case SDLK_RETURN: // START
 			AboutStart();
+			break;
+		case SDLK_SPACE: // X key
+			if (Mix_PausedMusic())
+				Mix_ResumeMusic();
+			else
+				Mix_PauseMusic();
 			break;
 		case SDLK_LCTRL:	// A key
 			if (g_Board[g_TileCursorY][g_TileCursorX] == BALL_NONE)
@@ -924,24 +938,34 @@ int main(int argc, char * argv[])
 	// Init SDL video
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) return 255;  // Unable to initialize SDL
 
+	// Init SDL audio
+	if( SDL_Init(SDL_INIT_AUDIO) < 0) return 254; // Unable to initialize SDL audio
+
+	// Setup audio mode
+	Mix_OpenAudio(22050,AUDIO_S16,2,512);
+	g_Music = Mix_LoadMUS("ColorLinesData/music.wav");
+	g_Intro = Mix_LoadMUS("ColorLinesData/intro.wav");
+
 	// Prepare screen surface
 	g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
-	if (g_pSurface == NULL) return 254;  // Unable to set video mode
+	if (g_pSurface == NULL) return 253;  // Unable to set video mode
 	SDL_ShowCursor(SDL_DISABLE);
 
 	// Load font
 	tempSurface = SDL_LoadBMP("ColorLinesData/font.bmp");
-	if (tempSurface == NULL) return 253;  // Unable to load bitmap
+	if (tempSurface == NULL) return 252;  // Unable to load bitmap
 	g_pFont = SDL_DisplayFormat(tempSurface);
 	SDL_FreeSurface(tempSurface);
 
 	// Load sprites
 	tempSurface = SDL_LoadBMP("ColorLinesData/sprites.bmp");
-	if (tempSurface == NULL) return 253;  // Unable to load bitmap
+	if (tempSurface == NULL) return 252;  // Unable to load bitmap
 	g_pSprites = SDL_DisplayFormat(tempSurface);
 	SDL_FreeSurface(tempSurface);
 
 	MenuStart();
+
+	Mix_PlayMusic(g_Intro, 1);
 
 	while (!g_okQuit)
 	{
@@ -982,6 +1006,7 @@ int main(int argc, char * argv[])
 
 	SDL_FreeSurface(g_pSprites);
 	SDL_FreeSurface(g_pFont);
+	Mix_CloseAudio();
 
 	SDL_Quit();
 

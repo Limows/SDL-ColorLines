@@ -9,12 +9,12 @@
 
 CC	=	gcc
 CXX	=	g++
-CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -march=x86-64 -DNO_DEBUG -std=c99
-CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -DQWS -fno-exceptions -fno-rtti -Wall -W -O2 -march=x86-64 -std=c++03 -DNO_DEBUG
+CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -march=x86-64 -DNO_DEBUG
+CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W -O2 -march=x86-64 -DNO_DEBUG
 INCPATH	=
 LINK	=	g++
 LFLAGS	=	`sdl-config --libs`
-LIBS	=   -lSDL -lSDLmain -lpthread -lz -lfreetype -lSDL_mixer -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
+LIBS	=   -lSDL -lSDLmain -lpthread -lz -lfreetype -lSDL_mixer -lSDL_image -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
 
 TAR	=	tar -cf
 GZIP	=	gzip -9f
@@ -25,11 +25,10 @@ HEADERS =
 SOURCES =	main.cpp
 OBJECTS =	main.o
 INTERFACES =	
-UICDECLS =	
-UICIMPLS =	
+PLATFORM = X86
 SRCMOC	=	
 OBJMOC	=
-DIST	=	
+APPDIR	=	ColorLines
 TARGET	=	ColorLines/ColorLines.elf
 INTERFACE_DECL_PATH = .
 
@@ -60,11 +59,11 @@ $(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
 
 dist:
-	$(TAR) ColorLines.tar $(SOURCES) $(HEADERS) $(INTERFACES) $(DIST)
-	$(GZIP) ColorLines.tar
+	$(TAR) $(APPDIR)-$(PLATFORM).tar $(APPDIR)
+	$(GZIP) $(APPDIR)-$(PLATFORM).tar
 
 clean:
-	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS) $(TARGET)
+	-rm -f $(OBJECTS) $(TARGET) $(APPDIR)-$(PLATFORM).tar.gz
 	-rm -f *~ core
 
 ####### Sub-libraries

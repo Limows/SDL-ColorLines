@@ -1,6 +1,6 @@
 #############################################################################
 # Makefile for building ColorLines.elf
-#     Project: ColorLines.elf
+#    Project: ColorLines.elf
 #    Template: app
 #############################################################################
 
@@ -28,12 +28,11 @@ GZIP	=	gzip -9f
 HEADERS =	
 SOURCES =	main.cpp
 OBJECTS =	main.o
-INTERFACES =	
-UICDECLS =	
-UICIMPLS =	
+INTERFACES =
+PLATFORM = A320
 SRCMOC	=	
 OBJMOC	=
-DIST	=	
+APPDIR	=	ColorLines
 TARGET	=	ColorLines/ColorLines.elf
 INTERFACE_DECL_PATH = .
 
@@ -60,15 +59,15 @@ INTERFACE_DECL_PATH = .
 
 all: $(TARGET)
 
-$(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) 
+$(TARGET): $(OBJECTS) $(OBJMOC) 
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
 
 dist:
-	$(TAR) ColorLines.dge.tar $(SOURCES) $(HEADERS) $(INTERFACES) $(DIST)
-	$(GZIP) ColorLines.dge.tar
+	$(TAR) $(APPDIR)-$(PLATFORM).tar $(APPDIR)
+	$(GZIP) $(APPDIR)-$(PLATFORM).tar
 
 clean:
-	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS) $(TARGET)
+	-rm -f $(OBJECTS) $(TARGET) $(APPDIR)-$(PLATFORM).tar.gz
 	-rm -f *~ core
 
 ####### Sub-libraries
