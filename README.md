@@ -8,6 +8,7 @@ Forked and updated version of SDL re-implementation of classic Color Lines game,
  - EZX - Motorola EZX platform
  - A320 - Dingoo A320 handheld
  - RZX50 - Ritmix RZX50 handheld
+ - S60v5 - Symbian S60v5 phones
  - X86-Linux - Default PC
 
 ## Contributing
