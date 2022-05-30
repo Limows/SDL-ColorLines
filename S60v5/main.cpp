@@ -40,8 +40,8 @@ void AboutStart();
 int main(int argc, char * argv[]);
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	2
-#define VERSION_BUILD	2905
+#define VERSION_MINOR	3
+#define VERSION_BUILD	3005
 
 #define SCREEN_WIDTH	640
 #define SCREEN_HEIGHT   360
@@ -80,6 +80,8 @@ enum BallEnum
 SDL_Surface *g_pSurface = NULL;
 SDL_Surface *g_pSprites = NULL;
 SDL_Surface *g_pFont = NULL;
+static unsigned char *g_AudioPos; // global pointer to the audio buffer to be played
+static uint g_AudioLen; // remaining length of the sample we have to play
 enum GameMode g_GameMode = GAMEMODE_MENU;
 int g_okQuit = 0;
 int g_Board[9][9];
@@ -90,6 +92,7 @@ int g_TileCursorX, g_TileCursorY;
 int g_okShowTileCursor = 0;
 int g_okTileCursorPhase = 0;
 int g_TileSelectX, g_TileSelectY;
+bool g_AudioPaused = false;
 
 enum SpriteEnum
 {
@@ -336,6 +339,21 @@ void DrawGameScreen()
 	DrawSprite(SPRITE_NEXT + g_NextColors[2], POSX_NEXT_LEFT + 32, 4);
 }
 
+// audio callback function
+// here you have to copy the data of your audio buffer into the
+// requesting audio buffer (stream)
+// you should only copy as much as the requested length (len)
+void AudioCallback(void *userdata, unsigned char *stream, int len)
+{
+        if (g_AudioLen == 0) return;
+
+        len = ( len > g_AudioLen ? g_AudioLen : len );
+        SDL_MixAudio(stream, g_AudioPos, len, SDL_MIX_MAXVOLUME);// mix from one buffer into another
+
+        g_AudioPos += len;
+        g_AudioLen -= len;
+}
+
 void GamePutRandomBall(int freecount)
 {
 	int i, place, ball;
@@ -475,15 +493,35 @@ bool LoadGame()
 
 void Init()
 {	
-	// Clear board
-	memset(g_Board, 0, sizeof(g_Board));
+    static uint wavLength; // length of our sample
+    static unsigned char *wavBuffer; // buffer containing our audio file
+    static SDL_AudioSpec wavSpec; // the specs of our piece of music
 
-	// Clear score
-	g_Score = 0;
+    // Clear board
+    memset(g_Board, 0, sizeof(g_Board));
+
+    // Clear score
+    g_Score = 0;
+
+    SDL_PauseAudio(1);
+    SDL_FreeWAV(wavBuffer);
+
+    // Load Music Wav
+    if( SDL_LoadWAV("\\private\\e336d524\\ColorLinesData\\music.wav", &wavSpec, &wavBuffer, &wavLength) == NULL ) exit(253);
+
+    wavSpec.callback = AudioCallback;
+    wavSpec.userdata = NULL;
+    g_AudioPos = wavBuffer; // copy sound buffer
+    g_AudioLen = wavLength; // copy file length
+
+    if (!g_AudioPaused)
+        SDL_PauseAudio(0);
 }
 
 void GameStart()
 {
+    if (g_GameMode != GAMEMODE_ABOUT)
+    {
 	g_KingScore = LoadScore();
 	g_TileCursorX = g_TileCursorY = 4;  // Cursor to center of the board
 	g_okShowTileCursor = 0;  // Hide cursor
@@ -503,6 +541,14 @@ void GameStart()
 	g_okShowTileCursor = 1;  // Show cursor
 
 	g_GameMode = GAMEMODE_PLAY;
+    }
+    else
+    {
+        DrawGameScreen();
+        SDL_Flip(g_pSurface);
+        SDL_Delay(100);
+        g_GameMode = GAMEMODE_PLAY;
+    }
 }
 
 int GameCheckPathExists(int x1, int y1, int x2, int y2)
@@ -769,6 +815,7 @@ void TakeAction(int i, int j)
 					{	
 						GameCheckToRemove();
 						SaveScore(g_Score);
+                                                SDL_PauseAudio(1);
 						MenuStart();
 					}
 					else
@@ -786,47 +833,56 @@ void TakeAction(int i, int j)
 	}
 }
 
-
-
 bool ClickAt(int x, int y) 
 {
-	int i, j;
+    int i, j;
 
-	for(i=0; i<9;i++) for(j=0; j<9;j++)
+    for(i=0; i<9;i++) for(j=0; j<9;j++)
+    {
+        if(ClickOnTile(x, y, i, j))
         {
-		if(ClickOnTile(x, y, i, j)) 
-		{ 
-                        TakeAction(i, j);
-                        return true;
-		}
-
-                if(ClickSoundButton(x, y))
-                {
-                    return true;
-                }
-
-                if(ClickAboutButton(x, y))
-                {
-                    AboutStart();
-                    return true;
-                }
-
-                if(ClickBackButton(x, y))
-                {
-                    SaveScore(g_Score);
-                    MenuStart();
-                    return true;
-                }
-
-                if(ClickNewGameButton(x, y))
-                {
-                    Init();
-                    GameStart();
-                    return true;
-                }
+            TakeAction(i, j);
+            return true;
         }
 
-	return false;
+        if(ClickSoundButton(x, y))
+        {
+            if (!g_AudioPaused)
+            {
+                SDL_PauseAudio(1);
+                g_AudioPaused = !g_AudioPaused;
+            }
+            else
+            {
+                SDL_PauseAudio(0);
+                g_AudioPaused = !g_AudioPaused;
+            }
+            return true;
+        }
+
+        if(ClickAboutButton(x, y))
+        {
+            AboutStart();
+            return true;
+        }
+
+        if(ClickBackButton(x, y))
+        {
+            SDL_PauseAudio(1);
+            SaveScore(g_Score);
+            MenuStart();
+            return true;
+        }
+
+        if(ClickNewGameButton(x, y))
+        {
+            Init();
+            GameStart();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void GameProcessEvent(SDL_Event evt)
@@ -840,6 +896,7 @@ void GameProcessEvent(SDL_Event evt)
 			GameStart();
 			break;
                 case SDLK_BACKSPACE:  // BACKSPACE
+                        SDL_PauseAudio(1);
 			MenuStart();
 			SaveScore(g_Score);
 			break;
@@ -1024,76 +1081,119 @@ void AboutProcessEvent(SDL_Event evt)
 
 int main(int argc, char * argv[])
 {
-	int flags = 0;
-	SDL_Event evt;
-	SDL_Surface *tempSurface;
+    int flags = 0;
+    SDL_Event evt;
+    SDL_Surface *tempSurface;
+    static uint wavLength; // length of our sample
+    static unsigned char *wavBuffer; // buffer containing our audio file
+    static SDL_AudioSpec wavSpec; // the specs of our piece of music
 
-	// Init randomizer
-	srand(SDL_GetTicks());
+    // Init randomizer
+    srand(SDL_GetTicks());
 
-	// Init SDL video
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) return 255;  // Unable to initialize SDL
+    // Init SDL video
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) return 255;  // Unable to initialize SDL
 
-	// Prepare screen surface
-	g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
-	if (g_pSurface == NULL) return 254;  // Unable to set video mode
-	SDL_ShowCursor(SDL_DISABLE);
+    // Init SDL audio
+    if( SDL_Init(SDL_INIT_AUDIO) < 0) return 254; // Unable to initialize SDL audio
 
-	// Load font
-        tempSurface = SDL_LoadBMP("\\private\\e336d524\\ColorLinesData\\font.bmp");
-	if (tempSurface == NULL) return 253;  // Unable to load bitmap
-	g_pFont = SDL_DisplayFormat(tempSurface);
-	SDL_FreeSurface(tempSurface);
+    // Load Intro Wav
+    if( SDL_LoadWAV("\\private\\e336d524\\ColorLinesData\\intro.wav", &wavSpec, &wavBuffer, &wavLength) == NULL ) return 253;
 
-	// Load sprites
-        tempSurface = SDL_LoadBMP("\\private\\e336d524\\ColorLinesData\\sprites.bmp");
-	if (tempSurface == NULL) return 253;  // Unable to load bitmap
-	g_pSprites = SDL_DisplayFormat(tempSurface);
-	SDL_FreeSurface(tempSurface);
+    wavSpec.callback = AudioCallback;
+    wavSpec.userdata = NULL;
+    g_AudioPos = wavBuffer; // copy sound buffer
+    g_AudioLen = wavLength; // copy file length
 
-	MenuStart();
+    // Open audio device
+    if ( SDL_OpenAudio(&wavSpec, NULL) < 0 ) return 252;
 
-	while (!g_okQuit)
-	{
-		while (SDL_PollEvent(&evt))
-		{
-			if (evt.type == SDL_QUIT)
-			{
-				g_okQuit = 1;
-				break;
-			}
-			else
-			{	
-				switch (g_GameMode)
-				{
-					case GAMEMODE_MENU:
-						MenuProcessEvent(evt);
-						break;
-					case GAMEMODE_PLAY:
-						GameProcessEvent(evt);
-						break;
-					case GAMEMODE_ABOUT:
-						AboutProcessEvent(evt);
-						break;
-					default:
-						break;
-				}
-			}
-		}
+    // Prepare screen surface
+    g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
+    if (g_pSurface == NULL) return 251;  // Unable to set video mode
+    SDL_ShowCursor(SDL_DISABLE);
 
-		if (g_GameMode == GAMEMODE_PLAY)
-		{
-			DrawGameScreen();
-			SDL_Flip(g_pSurface);
-		}
+    // Load font
+    tempSurface = SDL_LoadBMP("\\private\\e336d524\\ColorLinesData\\font.bmp");
+    if (tempSurface == NULL) return 250;  // Unable to load bitmap
+    g_pFont = SDL_DisplayFormat(tempSurface);
+    SDL_FreeSurface(tempSurface);
 
-		SDL_Delay(20);
-	}
+    // Load sprites
+    tempSurface = SDL_LoadBMP("\\private\\e336d524\\ColorLinesData\\sprites.bmp");
+    if (tempSurface == NULL) return 250;  // Unable to load bitmap
+    g_pSprites = SDL_DisplayFormat(tempSurface);
+    SDL_FreeSurface(tempSurface);
 
-	SDL_FreeSurface(g_pSprites);
-	SDL_FreeSurface(g_pFont);
+    SDL_PauseAudio(0);
 
-	SDL_Quit();
+    MenuStart();
 
-	return 0;
+    while (!g_okQuit)
+    {
+        if (g_GameMode != GAMEMODE_MENU)
+        {
+            if (g_AudioLen <= 0)
+            {
+                SDL_PauseAudio(1);
+                SDL_FreeWAV(wavBuffer);
+
+                // Load Music Wav
+                if( SDL_LoadWAV("\\private\\e336d524\\ColorLinesData\\music.wav", &wavSpec, &wavBuffer, &wavLength) == NULL ) return 253;
+
+                wavSpec.callback = AudioCallback;
+                wavSpec.userdata = NULL;
+                g_AudioPos = wavBuffer; // copy sound buffer
+                g_AudioLen = wavLength; // copy file length
+
+                SDL_PauseAudio(0);
+            }
+        }
+
+        while (SDL_PollEvent(&evt))
+        {
+            if (evt.type == SDL_QUIT)
+            {
+                g_okQuit = 1;
+                break;
+            }
+            else
+            {
+                switch (g_GameMode)
+                {
+                    case GAMEMODE_MENU:
+                        MenuProcessEvent(evt);
+                        break;
+
+                    case GAMEMODE_PLAY:
+                        GameProcessEvent(evt);
+                        break;
+
+                    case GAMEMODE_ABOUT:
+                        AboutProcessEvent(evt);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if (g_GameMode == GAMEMODE_PLAY)
+        {
+            DrawGameScreen();
+            SDL_Flip(g_pSurface);
+        }
+
+        SDL_Delay(20);
+    }
+
+    SDL_FreeSurface(g_pSprites);
+    SDL_FreeSurface(g_pFont);
+
+    SDL_CloseAudio();
+    SDL_FreeWAV(wavBuffer);
+
+    SDL_Quit();
+
+    return 0;
 }
