@@ -1,6 +1,6 @@
 # SDL-ColorLines
 
-Version for Symbian S60v5 also known as Symbian 9.4
+Version for Symbian S60v5 and Symbian^3 (Anna, Belle)
 
 ## Toolchain & SDK
 
@@ -10,11 +10,16 @@ SDL for Symbian: [here](https://sourceforge.net/projects/sdlforsymbian/files/)
 
 ## Install Tools & Build
 
+Copy libs to /QtSDK/Symbian/SDKs/Symbian1Qt473/epoc32/release 
+and headers to /QtSDK/Symbian/SDKs/Symbian1Qt473/epoc32/include
+
+Open project in Qt Creator and build it using Qt 4.7.3 for Symbian^1 build config
+
 ## Copy executable file to phone and run it
 
-Use Nokia PC Suite to install SIS file
+Use Nokia PC Suite to install SIS files of game and SDL library
 
-## Create PKG-package for Motorola E6 or A1200
+## Create package
 
 It will be auto-created in Qt Creator
 
