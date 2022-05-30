@@ -24,7 +24,7 @@ void AboutStart();
 
 #define VERSION_MAJOR	1
 #define VERSION_MINOR	3
-#define VERSION_BUILD	2705
+#define VERSION_BUILD	3005
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   272
@@ -440,6 +440,8 @@ void Init()
 
 void GameStart()
 {
+    if (g_GameMode != GAMEMODE_ABOUT)
+    {
 	g_KingScore = LoadScore();
 	g_TileCursorX = g_TileCursorY = 4;  // Cursor to center of the board
 	g_okShowTileCursor = 0;  // Hide cursor
@@ -459,7 +461,14 @@ void GameStart()
 	g_okShowTileCursor = 1;  // Show cursor
 
 	g_GameMode = GAMEMODE_PLAY;
-	
+    }
+    else
+    {
+        DrawGameScreen();
+        SDL_Flip(g_pSurface);
+        SDL_Delay(100);
+        g_GameMode = GAMEMODE_PLAY;
+    }
 }
 
 int GameCheckPathExists(int x1, int y1, int x2, int y2)
