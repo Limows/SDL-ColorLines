@@ -345,13 +345,13 @@ void DrawGameScreen()
 // you should only copy as much as the requested length (len)
 void AudioCallback(void *userdata, unsigned char *stream, int len)
 {
-        if (g_AudioLen == 0) return;
+    if (g_AudioLen == 0 || g_okQuit == 1) return;
 
-        len = ( len > g_AudioLen ? g_AudioLen : len );
-        SDL_MixAudio(stream, g_AudioPos, len, SDL_MIX_MAXVOLUME);// mix from one buffer into another
+    len = ( len > g_AudioLen ? g_AudioLen : len );
+    SDL_MixAudio(stream, g_AudioPos, len, SDL_MIX_MAXVOLUME);// mix from one buffer into another
 
-        g_AudioPos += len;
-        g_AudioLen -= len;
+    g_AudioPos += len;
+    g_AudioLen -= len;
 }
 
 void GamePutRandomBall(int freecount)
@@ -1190,6 +1190,7 @@ int main(int argc, char * argv[])
     SDL_FreeSurface(g_pSprites);
     SDL_FreeSurface(g_pFont);
 
+    SDL_UnlockAudio();
     SDL_CloseAudio();
     SDL_FreeWAV(wavBuffer);
 

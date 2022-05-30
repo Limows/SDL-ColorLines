@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>ColorLinesData/about.bmp</file>
+        <file>ColorLinesData/font.bmp</file>
+        <file>ColorLinesData/sprites.bmp</file>
+        <file>ColorLinesData/title.bmp</file>
+    </qresource>
+    <qresource prefix="/music">
+        <file>ColorLinesData/intro.wav</file>
+        <file>ColorLinesData/music.wav</file>
+    </qresource>
+</RCC>
