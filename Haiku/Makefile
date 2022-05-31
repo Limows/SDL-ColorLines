@@ -13,7 +13,7 @@ CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W 
 INCPATH	=
 LINK	=	g++
 LFLAGS	=	`sdl-config --libs`
-LIBS	= 	-lSDL
+LIBS	= 	-lSDL -lSDLmain -lSDL_mixer -lSDL_image
 
 TAR	=	tar -cf
 GZIP	=	gzip -9f
