@@ -8,12 +8,12 @@
 
 CC	=	gcc
 CXX	=	g++
-CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -march=x86-64 -DNO_DEBUG
-CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W -O2 -march=x86-64 -DNO_DEBUG
+CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -DNO_DEBUG
+CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W -O2 -DNO_DEBUG
 INCPATH	=
 LINK	=	g++
 LFLAGS	=	`sdl-config --libs`
-LIBS	=   -lSDL -lSDLmain -lpthread -lz -lfreetype -lSDL_mixer -lSDL_image -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
+LIBS	= 	-lSDL
 
 TAR	=	tar -cf
 GZIP	=	gzip -9f
@@ -24,11 +24,11 @@ HEADERS =
 SOURCES =	main.cpp
 OBJECTS =	main.o
 INTERFACES =	
-PLATFORM = X86
+PLATFORM = Haiku
 SRCMOC	=	
 OBJMOC	=
 APPDIR	=	ColorLines
-TARGET	=	ColorLines/ColorLines.elf
+TARGET	=	ColorLines/ColorLines
 INTERFACE_DECL_PATH = .
 
 ####### Implicit rules

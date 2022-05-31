@@ -13,8 +13,8 @@ Color Lines SDL
 #include <fstream>
 #include <string.h>
 #include <SDL/SDL.h>
-#include <SDL/SDL_mixer.h>
-#include <SDL/SDL_image.h>
+//#include <SDL/SDL_mixer.h>
+//#include <SDL/SDL_image.h>
 
 using namespace std;
 
@@ -23,7 +23,7 @@ void GameStart();
 void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	3
+#define VERSION_MINOR	2
 #define VERSION_BUILD	3005
 
 #define SCREEN_WIDTH	480
@@ -37,9 +37,6 @@ void AboutStart();
 #define POSY_BOARD_TOP	 32
 #define POSY_TILES_TOP	 (POSY_BOARD_TOP + 2)
 #define POSX_NEXT_LEFT	 (POSX_BOARD_LEFT + 110)
-
-#define PATH_MAX	50
-#define MAX_INT		65535
 
 enum GameMode
 {
@@ -64,9 +61,9 @@ enum BallEnum
 SDL_Surface *g_pSurface = NULL;
 SDL_Surface *g_pSprites = NULL;
 SDL_Surface *g_pFont = NULL;
-Mix_Music *g_Music;
-Mix_Music *g_Intro;
-Mix_Chunk *g_Bouncing;
+//Mix_Music *g_Music;
+//Mix_Music *g_Intro;
+//Mix_Chunk *g_Bouncing;
 enum GameMode g_GameMode = GAMEMODE_MENU;
 int g_okQuit = 0;
 int g_Board[9][9];
@@ -77,6 +74,7 @@ int g_TileCursorX, g_TileCursorY;
 int g_okShowTileCursor = 0;
 int g_okTileCursorPhase = 0;
 int g_TileSelectX, g_TileSelectY;
+char g_cwd[PATH_MAX];
 
 enum SpriteEnum
 {
@@ -435,7 +433,7 @@ void Init()
 	g_Score = 0;
 
 	//Start music
-	Mix_PlayMusic(g_Music, MAX_INT);
+//	Mix_PlayMusic(g_Music, MAX_INT);
 }
 
 void GameStart()
@@ -756,7 +754,7 @@ void GameProcessEvent(SDL_Event evt)
 			GameStart();
 			break;
 		case SDLK_ESCAPE:  // ESC
-			Mix_PauseMusic();
+			//Mix_PauseMusic();
 			MenuStart();
 			SaveScore(g_Score);
 			break;
@@ -780,10 +778,10 @@ void GameProcessEvent(SDL_Event evt)
 			AboutStart();
 			break;
 		case SDLK_F2: // F2
-			if (Mix_PausedMusic())
-				Mix_ResumeMusic();
-			else
-				Mix_PauseMusic();
+			//if (Mix_PausedMusic())
+			//	Mix_ResumeMusic();
+			//else
+			//	Mix_PauseMusic();
 			break;
 		case SDLK_RETURN:	// ENTER
 			if (g_Board[g_TileCursorY][g_TileCursorX] == BALL_NONE)
@@ -944,6 +942,7 @@ int main(int argc, char * argv[])
 	int flags = 0;
 	SDL_Event evt;
 	SDL_Surface *tempSurface;
+	char cwd[PATH_MAX];
 
 	// Init randomizer
 	srand(SDL_GetTicks());
@@ -951,15 +950,15 @@ int main(int argc, char * argv[])
 	// Init SDL video
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) return 255;  // Unable to initialize SDL video
 	SDL_WM_SetCaption("Color Lines", "Color Lines");
-	SDL_WM_SetIcon(IMG_Load("ismall.png"), NULL);
+	//SDL_WM_SetIcon(IMG_Load("ismall.png"), NULL);
 
 	// Init SDL audio
-	if( SDL_Init(SDL_INIT_AUDIO) < 0) return 254; // Unable to initialize SDL audio
+	//if( SDL_Init(SDL_INIT_AUDIO) < 0) return 254; // Unable to initialize SDL audio
 
 	// Setup audio mode
-	Mix_OpenAudio(44100,AUDIO_S16,2,512);
-	g_Music = Mix_LoadMUS("ColorLinesData/music.ogg");
-	g_Intro = Mix_LoadMUS("ColorLinesData/intro.ogg");
+	//Mix_OpenAudio(44100,AUDIO_S16,2,512);
+	//g_Music = Mix_LoadMUS("ColorLinesData/music.ogg");
+	//g_Intro = Mix_LoadMUS("ColorLinesData/intro.ogg");
 
 	// Prepare screen surface
 	g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
@@ -980,7 +979,7 @@ int main(int argc, char * argv[])
 
 	MenuStart();
 
-	Mix_PlayMusic(g_Intro, 1);
+	//Mix_PlayMusic(g_Intro, 1);
 
 	while (!g_okQuit)
 	{
@@ -1021,7 +1020,7 @@ int main(int argc, char * argv[])
 
 	SDL_FreeSurface(g_pSprites);
 	SDL_FreeSurface(g_pFont);
-	Mix_CloseAudio();
+	//Mix_CloseAudio();
 
 	SDL_Quit();
 
