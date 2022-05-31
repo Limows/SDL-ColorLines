@@ -1,82 +1,70 @@
-#############################################################################
-# Makefile for building ColorLines.elf
-#    Project: ColorLines.elf
-#    Template: app
-#############################################################################
+# Define the applications properties here:
 
-####### Compiler, tools and options
-
-SDK_LIB_DIR = $(RZX50PATH)/lib
-SDK_INC_DIR = $(RZX50PATH)/include
-SDK_USR_LIB_DIR = $(RZX50PATH)/usr/lib
-SDK_USR_INC_DIR = $(RZX50PATH)/usr/include
-SDK_SDL_INC_DIR = $(RZX50PATH)/usr/include/SDL
-CC	=	mipsel-linux-gcc
-CXX	=	mipsel-linux-g++
-CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -mips32 -mtune=mips32 -DNO_DEBUG
-CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W -O2 -mips32 -mtune=mips32 -DNO_DEBUG
-INCPATH	=	-I $(SDK_USR_INC_DIR) -I $(SDK_SDL_INC_DIR) -I $(SDK_INC_DIR)
-LINK	=	mipsel-linux-g++
-LFLAGS	=	`sdl-config --libs`
-LIBS	=  -L $(SDK_LIB_DIR) -L $(SDK_USR_LIB_DIR) -lSDL -lSDLmain -lpthread -lz -lfreetype -lSDL_mixer -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
-
-TAR	=	tar -cf
-GZIP	=	gzip -9f
-
-####### Files
-
-HEADERS =	
-SOURCES =	main.cpp
-OBJECTS =	main.o
-INTERFACES =
-PLATFORM = A320
-SRCMOC	=	
-OBJMOC	=
-APPDIR	=	ColorLines
-TARGET	=	ColorLines/ColorLines.elf
-INTERFACE_DECL_PATH = .
-
-####### Implicit rules
-
-.SUFFIXES: .cpp .cxx .cc .C .c
-
-.cpp.o:
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
-
-.cxx.o:
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
-
-.cc.o:
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
-
-.C.o:
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
-
-.c.o:
-	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
-
-####### Build rules
-
-all: $(TARGET)
-
-$(TARGET): $(OBJECTS) $(OBJMOC) 
-	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
-
-dist:
-	$(TAR) $(APPDIR)-$(PLATFORM).tar $(APPDIR)
-	$(GZIP) $(APPDIR)-$(PLATFORM).tar
-
-clean:
-	-rm -f $(OBJECTS) $(TARGET) $(APPDIR)-$(PLATFORM).tar.gz
-	-rm -f *~ core
-
-####### Sub-libraries
+APP_NAME = ColorLinesSdl
 
 
-###### Combined headers
+
+# Define the compiler settings here:
+
+CPP       = mipsel-linux-g++
+CC        = mipsel-linux-gcc
+LD        = mipsel-linux-ld
+
+SOURCE    = .
+
+INCLUDE   = -I$(DINGOO_SDK)/include -I$(DINGOO_SDK)/include/SDL -I../lib -I$(MIPSTOOLS)/mipsel-linux/include -I$
+
+W_OPTS    = -Wall -Wextra -finline-functions -fomit-frame-pointer -msoft-float -fno-builtin -fno-exceptions
+CPP_OPTS  = -G0 -O3 $(INCLUDE) -mips32 -mno-abicalls -fno-pic $(W_OPTS) -D_DEBUG -DMPU_JZ4740 -c
+CC_OPTS   = -G0 -O3 $(INCLUDE) -mips32 -mno-abicalls -fno-pic $(W_OPTS) -D_DEBUG -DMPU_JZ4740 -DNOSOUND -DEMBEDDED -c
+CC_OPTS_A = $(CC_OPTS) -D_ASSEMBLER_
+
+LIB_PATH  = $(DINGOO_SDK)/lib
+LIBS      = -lSDL -lpng -lsml -lz -lm -lc -ljz4740 -lgcc
+
+LD_SCRIPT = $(DINGOO_SDK)/lib/dingoo.xn
+LD_OPTS   = -nodefaultlibs --script $(LD_SCRIPT) -L$(LIB_PATH) $(LIBS) -o $(APP_NAME).elf
 
 
-####### Compile
 
-main.o: main.cpp
+# Find all source files
 
+SRC_CPP = $(foreach dir, $(SOURCE), $(wildcard $(dir)/*.cpp))
+SRC_C   = $(foreach dir, $(SOURCE), $(wildcard $(dir)/*.c))
+SRC_S   = $(foreach dir, $(SOURCE), $(wildcard $(dir)/*.S))
+OBJ_CPP = $(patsubst %.cpp, %.o, $(SRC_CPP))
+OBJ_C   = $(patsubst %.c, %.o, $(SRC_C))
+OBJ_S   = $(patsubst %.S, %.o, $(SRC_S))
+OBJ     = $(OBJ_CPP) $(OBJ_C) $(OBJ_S)
+
+
+
+# Compile rules.
+
+.PHONY : all
+
+all : $(APP_NAME).app
+
+$(APP_NAME).app : $(APP_NAME).elf
+	$(DINGOO_SDK)/tools/elf2app/elf2app $(APP_NAME)
+
+$(APP_NAME).elf : $(OBJ)
+	$(LD) $(OBJ) $(LD_OPTS)
+
+$(OBJ_CPP) : %.o : %.cpp
+	$(CPP) $(CPP_OPTS) -o $@ $<
+
+$(OBJ_C) : %.o : %.c
+	$(CC) $(CC_OPTS) -o $@ $<
+
+$(OBJ_S) : %.o : %.S
+	$(CC) $(CC_OPTS_A) -o $@ $<
+
+
+
+# Clean rules
+
+.PHONY : clean
+
+clean :
+	rm -f $(OBJ) $(APP_NAME).elf $(APP_NAME).bin $(APP_NAME).app
