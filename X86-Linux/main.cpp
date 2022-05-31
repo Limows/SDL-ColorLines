@@ -24,21 +24,21 @@ void AboutStart();
 
 #define VERSION_MAJOR	1
 #define VERSION_MINOR	3
-#define VERSION_BUILD	3005
+#define VERSION_BUILD	3105
 
 #define SCREEN_WIDTH	480
-#define SCREEN_HEIGHT   272
+#define SCREEN_HEIGHT   360
 
 #define FONT_WIDTH		  8
 #define FONT_HEIGHT		 16
 
 #define POSX_BOARD_LEFT	 130
 #define POSX_TILES_LEFT	 (POSX_BOARD_LEFT + 2)
-#define POSY_BOARD_TOP	 32
+#define POSY_BOARD_TOP	 25
 #define POSY_TILES_TOP	 (POSY_BOARD_TOP + 2)
 #define POSX_NEXT_LEFT	 (POSX_BOARD_LEFT + 110)
 
-#define PATH_MAX	50
+#define PATH_MAX	1024
 #define MAX_INT		65535
 
 enum GameMode
@@ -77,6 +77,7 @@ int g_TileCursorX, g_TileCursorY;
 int g_okShowTileCursor = 0;
 int g_okTileCursorPhase = 0;
 int g_TileSelectX, g_TileSelectY;
+int g_ScoreMult = 0;
 
 enum SpriteEnum
 {
@@ -98,21 +99,24 @@ enum SpriteEnum
 	SPRITE_NEXT_CYAN = 15,
 	SPRITE_NEXT_MAGENTA = 16,
 	SPRITE_NEXT_BROWN = 17,
-	SPRITECOUNT = 18
+	SPRITE_COLUMN = 18,
+	SPRITE_KING_LOSE = 19,
+	SPRITE_PRETENDER_WIN = 20,
+	SPRITECOUNT = 21
 };
 
 int SPRITECOORDS[SPRITECOUNT * 4] =
 {
-	  1,  1,  70, 94,  // SPRITE_KING
-	 72,  1,  66, 94,
-	  1, 96,  24, 24,  // SPRITE_TILE
-	 26, 96,  24, 24,
-	 51, 96,  24, 24,
-	 76, 96,  24, 24,
-	101, 96,  24, 24,
-	126, 96,  24, 24,
-	151, 96,  24, 24,
-	176, 96,  24, 24,
+	  1,   1, 70, 94,  // SPRITE_KING
+	 72,   1, 66, 94,
+	  1,  96, 24, 24,  // SPRITE_TILE
+	 26,  96, 24, 24,
+	 51,  96, 24, 24,
+	 76,  96, 24, 24,
+	101,  96, 24, 24,
+	126,  96, 24, 24,
+	151,  96, 24, 24,
+	176,  96, 24, 24,
 	  1, 121, 11, 10,  // SPRITE_NEXT
 	 13, 121, 11, 10,
 	 25, 121, 11, 10,
@@ -121,6 +125,9 @@ int SPRITECOORDS[SPRITECOUNT * 4] =
 	 61, 121, 11, 10,
 	 73, 121, 11, 10,
 	 85, 121, 11, 10,
+	216,  96, 60, 98,
+	139,   1, 70, 94,
+	210,   1, 66, 94,
 };
 
 void DrawSprite(int sprite, int x, int y)
@@ -225,14 +232,50 @@ void DrawGameScreen()
 	int i, j, tile;
 	SDL_Rect rc;
 	char buf[10];
+	int kingPos;
+	int pretenderPos;
+	int kingSprite;
+	int pretenderSprite;
+
+	if (g_Score <= (20 * g_ScoreMult))
+	{
+		pretenderPos = POSY_BOARD_TOP + 220 - 115 - FONT_HEIGHT;
+		kingPos = POSY_BOARD_TOP + 220 - 200 - FONT_HEIGHT;
+	}
+	else
+	{
+		if (g_Score < g_KingScore - (20 * g_ScoreMult))
+		{
+			kingPos = POSY_BOARD_TOP + 220 - 100 - (g_KingScore - g_Score)/g_ScoreMult - FONT_HEIGHT;
+			pretenderPos = POSY_BOARD_TOP + 220 - 200 + (g_KingScore - g_Score)/g_ScoreMult - FONT_HEIGHT;
+		}
+		else
+		{
+			kingPos = POSY_BOARD_TOP + 220 - 115 - FONT_HEIGHT;
+			pretenderPos = POSY_BOARD_TOP + 220 - 200 - FONT_HEIGHT;
+		}
+	}
+
+	if (g_Score <= g_KingScore)
+	{
+		kingSprite = SPRITE_KING;
+		pretenderSprite = SPRITE_PRETENDER;
+	}
+	else
+	{
+		kingSprite = SPRITE_KING_LOSE;
+		pretenderSprite = SPRITE_PRETENDER_WIN;
+	}
 
 	// Clear screen
 	rc.x = rc.y = 0;  rc.w = SCREEN_WIDTH; rc.h = SCREEN_HEIGHT;
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 0,0,0));
 
 	// Draw board and sprites
-	DrawSprite(SPRITE_KING, 20, 75);
-	DrawSprite(SPRITE_PRETENDER, SCREEN_WIDTH - 86, 75);
+	DrawSprite(SPRITE_COLUMN, 19, POSY_BOARD_TOP + 220 - 108 - FONT_HEIGHT);
+	DrawSprite(SPRITE_COLUMN, SCREEN_WIDTH - 82, POSY_BOARD_TOP + 220 - 108 - FONT_HEIGHT);
+	DrawSprite(kingSprite, 20, kingPos);
+	DrawSprite(pretenderSprite, SCREEN_WIDTH - 90, pretenderPos);
 	rc.x = POSX_BOARD_LEFT;  rc.y = POSY_BOARD_TOP;
 	rc.w = rc.h = 24 * 9 + 4;
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 173,170,173));
@@ -266,8 +309,8 @@ void DrawGameScreen()
 	DrawText(SCREEN_WIDTH - FONT_WIDTH * 6 - 35, 2, buf);
 
 	// Draw names
-	DrawText(35, 75 + 94 + 10, "King");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 9 - 14), 75 + 94 + 10, "Pretender");
+	DrawText(35, POSY_BOARD_TOP + 220 - FONT_HEIGHT, "King");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 9 - 14), POSY_BOARD_TOP + 220 - FONT_HEIGHT, "Pretender");
 
 	// Draw next colors
 	DrawText(POSX_NEXT_LEFT - FONT_WIDTH * 6, 2, "Next:");
@@ -433,6 +476,8 @@ void Init()
 
 	// Clear score
 	g_Score = 0;
+	g_KingScore = LoadScore();
+	g_ScoreMult = g_KingScore/100;
 
 	//Start music
 	Mix_PlayMusic(g_Music, MAX_INT);
@@ -442,25 +487,24 @@ void GameStart()
 {
     if (g_GameMode != GAMEMODE_ABOUT)
     {
-	g_KingScore = LoadScore();
-	g_TileCursorX = g_TileCursorY = 4;  // Cursor to center of the board
-	g_okShowTileCursor = 0;  // Hide cursor
-	g_TileSelectX = g_TileSelectY = -1;  // No selection
+		g_TileCursorX = g_TileCursorY = 4;  // Cursor to center of the board
+		g_okShowTileCursor = 0;  // Hide cursor
+		g_TileSelectX = g_TileSelectY = -1;  // No selection
 
-	g_NextColors[0] = rand() % BALLCOLORCOUNT + 1;
-	g_NextColors[1] = rand() % BALLCOLORCOUNT + 1;
-	g_NextColors[2] = rand() % BALLCOLORCOUNT + 1;
+		g_NextColors[0] = rand() % BALLCOLORCOUNT + 1;
+		g_NextColors[1] = rand() % BALLCOLORCOUNT + 1;
+		g_NextColors[2] = rand() % BALLCOLORCOUNT + 1;
 
-	DrawGameScreen();
-	SDL_Flip(g_pSurface);
-	SDL_Delay(100);
+		DrawGameScreen();
+		SDL_Flip(g_pSurface);
+		SDL_Delay(100);
 
-	// Put first three random balls
-	GamePutThreeRandomBalls();
+		// Put first three random balls
+		GamePutThreeRandomBalls();
 
-	g_okShowTileCursor = 1;  // Show cursor
+		g_okShowTileCursor = 1;  // Show cursor
 
-	g_GameMode = GAMEMODE_PLAY;
+		g_GameMode = GAMEMODE_PLAY;
     }
     else
     {

@@ -20,3 +20,6 @@
 
 # Qt MOC generated files.
 *.moc
+
+# Save files
+*.file
