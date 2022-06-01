@@ -23,8 +23,8 @@ void GameStart();
 void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	3
-#define VERSION_BUILD	3105
+#define VERSION_MINOR	5
+#define VERSION_BUILD	0106
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   360
@@ -66,6 +66,7 @@ SDL_Surface *g_pSprites = NULL;
 SDL_Surface *g_pFont = NULL;
 Mix_Music *g_Music;
 Mix_Music *g_Intro;
+Mix_Chunk *g_Win;
 Mix_Chunk *g_Bouncing;
 enum GameMode g_GameMode = GAMEMODE_MENU;
 int g_okQuit = 0;
@@ -77,7 +78,8 @@ int g_TileCursorX, g_TileCursorY;
 int g_okShowTileCursor = 0;
 int g_okTileCursorPhase = 0;
 int g_TileSelectX, g_TileSelectY;
-int g_ScoreMult = 0;
+double g_ScoreMult = 0;
+bool g_PlayWin = true;
 
 enum SpriteEnum
 {
@@ -102,7 +104,8 @@ enum SpriteEnum
 	SPRITE_COLUMN = 18,
 	SPRITE_KING_LOSE = 19,
 	SPRITE_PRETENDER_WIN = 20,
-	SPRITECOUNT = 21
+	SPRITE_BUTTON = 21,
+	SPRITECOUNT = 22
 };
 
 int SPRITECOORDS[SPRITECOUNT * 4] =
@@ -128,6 +131,7 @@ int SPRITECOORDS[SPRITECOUNT * 4] =
 	216,  96, 60, 98,
 	139,   1, 70, 94,
 	210,   1, 66, 94,
+	145, 144, 70, 50,
 };
 
 void DrawSprite(int sprite, int x, int y)
@@ -237,17 +241,17 @@ void DrawGameScreen()
 	int kingSprite;
 	int pretenderSprite;
 
-	if (g_Score <= (20 * g_ScoreMult))
+	if (g_Score <= 0)
 	{
 		pretenderPos = POSY_BOARD_TOP + 220 - 115 - FONT_HEIGHT;
 		kingPos = POSY_BOARD_TOP + 220 - 200 - FONT_HEIGHT;
 	}
 	else
 	{
-		if (g_Score < g_KingScore - (20 * g_ScoreMult))
+		if (g_Score < g_KingScore - 10 * g_ScoreMult)
 		{
-			kingPos = POSY_BOARD_TOP + 220 - 100 - (g_KingScore - g_Score)/g_ScoreMult - FONT_HEIGHT;
-			pretenderPos = POSY_BOARD_TOP + 220 - 200 + (g_KingScore - g_Score)/g_ScoreMult - FONT_HEIGHT;
+			kingPos = POSY_BOARD_TOP + 220 - 100 - int((g_KingScore - g_Score)/(g_ScoreMult)) - FONT_HEIGHT;
+			pretenderPos = POSY_BOARD_TOP + 220 - 215 + int((g_KingScore - g_Score)/(g_ScoreMult)) - FONT_HEIGHT;
 		}
 		else
 		{
@@ -301,6 +305,18 @@ void DrawGameScreen()
 	{
 		DrawTileCursor();
 	}
+
+	// Draw buttons
+	DrawSprite(SPRITE_BUTTON, 13, SCREEN_HEIGHT - 70);
+	DrawText(27, SCREEN_HEIGHT - 40, "Sound");
+	DrawSprite(SPRITE_BUTTON, 109, SCREEN_HEIGHT - 70);
+	DrawText(125, SCREEN_HEIGHT - 40, "About");
+	DrawSprite(SPRITE_BUTTON, 205, SCREEN_HEIGHT - 70);
+	DrawText(210, SCREEN_HEIGHT - 40, "New Game");
+	DrawSprite(SPRITE_BUTTON, 301, SCREEN_HEIGHT - 70);
+	DrawText(320, SCREEN_HEIGHT - 40, "Back");
+	DrawSprite(SPRITE_BUTTON, 397, SCREEN_HEIGHT - 70);
+	DrawText(417, SCREEN_HEIGHT - 40, "Exit");
 
 	// Draw score
 	sprintf(buf, "%d", g_KingScore);
@@ -477,7 +493,7 @@ void Init()
 	// Clear score
 	g_Score = 0;
 	g_KingScore = LoadScore();
-	g_ScoreMult = g_KingScore/100;
+	g_ScoreMult = g_KingScore/100.0;
 
 	//Start music
 	Mix_PlayMusic(g_Music, MAX_INT);
@@ -747,6 +763,31 @@ bool ClickOnTile(int mx, int my, int x, int y)
 	return PointOver(mx, my, POSX_TILES_LEFT+x*24, POSY_TILES_TOP+y*24, 24, 24); 
 }
 
+bool ClickSoundButton(int mx, int my)
+{
+        return PointOver(mx, my, 33, 290, 25, 25);
+}
+
+bool ClickAboutButton(int mx, int my)
+{
+        return PointOver(mx, my, 130, 290, 25, 25);
+}
+
+bool ClickNewGameButton(int mx, int my)
+{
+        return PointOver(mx, my, 225, 290, 25, 25);
+}
+
+bool ClickBackButton(int mx, int my)
+{
+        return PointOver(mx, my, 320, 290, 25, 25);
+}
+
+bool ClickExitButton(int mx, int my)
+{
+        return PointOver(mx, my, 417, 290, 25, 25);
+}
+
 void TakeAction(int i, int j) 
 {
 	g_TileCursorX=i; g_TileCursorY=j;
@@ -759,6 +800,7 @@ void TakeAction(int i, int j)
 					{	
 						GameCheckToRemove();
 						SaveScore(g_Score);
+						Mix_PauseMusic();
 						MenuStart();
 					}
 					else
@@ -780,11 +822,53 @@ bool ClickAt(int x, int y)
 {
 	int i, j;
 
-	for(i=0; i<9;i++) for(j=0; j<9;j++)
-		if(ClickOnTile(x, y, i, j)) 
-		{ 
-			TakeAction(i, j); return true; 
-		}
+	for(i=0; i<9;i++) 
+		for(j=0; j<9;j++)
+			if(ClickOnTile(x, y, i, j)) 
+			{ 
+				TakeAction(i, j); return true; 
+			}
+
+	if(ClickSoundButton(x, y))
+    {
+    	if (!Mix_PausedMusic())
+        {
+    		Mix_PauseMusic();
+        }
+    	else
+        {
+        	Mix_ResumeMusic();
+        }
+        return true;
+    }
+
+    if(ClickAboutButton(x, y))
+    {
+        AboutStart();
+        return true;
+    }
+
+    if(ClickBackButton(x, y))
+    {
+        Mix_PauseMusic();
+        SaveScore(g_Score);
+        MenuStart();
+        return true;
+    }
+
+	if(ClickExitButton(x, y))
+    {
+        SaveScore(g_Score);
+		g_okQuit = 1;
+        return true;
+    }
+
+    if(ClickNewGameButton(x, y))
+    {
+        Init();
+        GameStart();
+        return true;
+    }
 
 	return false;
 }
@@ -941,7 +1025,7 @@ void AboutStart()
 	DrawText((SCREEN_WIDTH - FONT_WIDTH * 29)/2, vTextAlign + FONT_HEIGHT * 5 + 2, "is to score as many points as");
 	DrawText((SCREEN_WIDTH - FONT_WIDTH * 30)/2, vTextAlign + FONT_HEIGHT * 6 + 2, "possible by matching the balls");
 	DrawText((SCREEN_WIDTH - FONT_WIDTH * 23)/2, vTextAlign + FONT_HEIGHT * 7 + 2, "in lines of 5 or more.");
-	DrawText((SCREEN_WIDTH - FONT_WIDTH * 18)/2, vTextAlign + FONT_HEIGHT * 9, "x86 port by Limows");
+	DrawText((SCREEN_WIDTH - FONT_WIDTH * 20)/2, vTextAlign + FONT_HEIGHT * 9, "Linux port by Limows");
 
 	SDL_Flip(g_pSurface);
 
@@ -1004,6 +1088,8 @@ int main(int argc, char * argv[])
 	Mix_OpenAudio(44100,AUDIO_S16,2,512);
 	g_Music = Mix_LoadMUS("ColorLinesData/music.ogg");
 	g_Intro = Mix_LoadMUS("ColorLinesData/intro.ogg");
+	g_Win = Mix_LoadWAV("ColorLinesData/win.wav");
+	g_Bouncing = Mix_LoadWAV("ColorLinesData/bouncing.wav");
 
 	// Prepare screen surface
 	g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
@@ -1024,10 +1110,20 @@ int main(int argc, char * argv[])
 
 	MenuStart();
 
-	Mix_PlayMusic(g_Intro, 1);
+	Mix_PlayMusic(g_Intro, 0);
 
 	while (!g_okQuit)
-	{
+	{	
+		if (g_GameMode != GAMEMODE_MENU)
+		{
+			if (g_KingScore < g_Score && g_PlayWin)
+			{	
+				Mix_VolumeChunk(g_Win, 50);
+				Mix_PlayChannel(-1, g_Win, 0);
+				g_PlayWin = false;
+			}
+		}
+
 		while (SDL_PollEvent(&evt))
 		{
 			if (evt.type == SDL_QUIT)

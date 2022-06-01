@@ -815,7 +815,7 @@ void TakeAction(int i, int j)
 					{	
 						GameCheckToRemove();
 						SaveScore(g_Score);
-                                                SDL_PauseAudio(1);
+                        SDL_PauseAudio(1);
 						MenuStart();
 					}
 					else
@@ -837,15 +837,15 @@ bool ClickAt(int x, int y)
 {
     int i, j;
 
-    for(i=0; i<9;i++) for(j=0; j<9;j++)
-    {
-        if(ClickOnTile(x, y, i, j))
-        {
-            TakeAction(i, j);
-            return true;
-        }
+    for(i=0; i<9;i++) 
+		for(j=0; j<9;j++)
+        	if(ClickOnTile(x, y, i, j))
+        	{
+            	TakeAction(i, j);
+            	return true;
+        	}
 
-        if(ClickSoundButton(x, y))
+	if(ClickSoundButton(x, y))
         {
             if (!g_AudioPaused)
             {
@@ -880,7 +880,6 @@ bool ClickAt(int x, int y)
             GameStart();
             return true;
         }
-    }
 
     return false;
 }

@@ -8,12 +8,12 @@
 
 CC	=	gcc
 CXX	=	g++
-CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -march=x86-64 -DNO_DEBUG
-CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W -O2 -march=x86-64 -DNO_DEBUG
+CFLAGS	=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -Wall -W -O2 -DNO_DEBUG
+CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W -O2 -DNO_DEBUG
 INCPATH	=
 LINK	=	g++
 LFLAGS	=	`sdl-config --libs`
-LIBS	=   -lSDL -lSDLmain -lpthread -lz -lfreetype -lSDL_mixer -lSDL_image -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
+LIBS	=   -lSDL -lSDLmain -lpthread -lz -lSDL_mixer -lSDL_image -logg
 
 TAR	=	tar -cf
 GZIP	=	gzip -9f
@@ -24,7 +24,8 @@ HEADERS =
 SOURCES =	main.cpp
 OBJECTS =	main.o
 INTERFACES =	
-PLATFORM = X86
+PLATFORM = Linux
+CPU = `uname -m`
 SRCMOC	=	
 OBJMOC	=
 APPDIR	=	ColorLines
@@ -58,11 +59,11 @@ $(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
 
 dist:
-	$(TAR) $(APPDIR)-$(PLATFORM).tar $(APPDIR)
-	$(GZIP) $(APPDIR)-$(PLATFORM).tar
+	$(TAR) $(APPDIR)-$(PLATFORM)-$(shell uname -m).tar $(APPDIR)
+	$(GZIP) $(APPDIR)-$(PLATFORM)-$(shell uname -m).tar
 
 clean:
-	-rm -f $(OBJECTS) $(TARGET) $(APPDIR)-$(PLATFORM).tar.gz
+	-rm -f $(OBJECTS) $(TARGET) $(APPDIR)-$(PLATFORM)-$(shell uname -m).tar.gz
 	-rm -f *~ core
 
 ####### Sub-libraries
