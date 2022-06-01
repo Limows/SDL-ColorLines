@@ -926,6 +926,7 @@ void GameProcessEvent(SDL_Event evt)
 							if(!GamePutThreeRandomBalls())
 							{	
 								GameCheckToRemove();
+								Mix_PauseMusic();
 								SaveScore(g_Score);
 								MenuStart();
 							}
@@ -963,7 +964,6 @@ void MenuStart()
 	int vTextAlign = vAlign + 34;
 
 	//Clear screen
-	//SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, 0);
 	SDL_FillRect(g_pSurface, NULL, 0x000000);
 
 	// Show title screen

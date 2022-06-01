@@ -18,7 +18,7 @@ CXXFLAGS=	-pipe -D_GNU_SOURCE=1 -D_REENTRANT -fno-exceptions -fno-rtti -Wall -W 
 INCPATH	=	-I $(SDK_USR_INC_DIR) -I $(SDK_SDL_INC_DIR) -I $(SDK_INC_DIR)
 LINK	=	mipsel-linux-g++
 LFLAGS	=	`sdl-config --libs`
-LIBS	=  -L $(SDK_LIB_DIR) -L $(SDK_USR_LIB_DIR) -lSDL -lSDLmain -lpthread -lz -lfreetype -lSDL_mixer -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
+LIBS	=  -L $(SDK_LIB_DIR) -L $(SDK_USR_LIB_DIR) -lSDL -lSDLmain -lpthread -lz -lSDL_mixer
 
 TAR	=	tar -cf
 GZIP	=	gzip -9f
