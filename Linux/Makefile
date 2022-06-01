@@ -25,7 +25,6 @@ SOURCES =	main.cpp
 OBJECTS =	main.o
 INTERFACES =	
 PLATFORM = Linux
-CPU = `uname -m`
 SRCMOC	=	
 OBJMOC	=
 APPDIR	=	ColorLines

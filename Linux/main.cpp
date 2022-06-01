@@ -24,7 +24,7 @@ void AboutStart();
 
 #define VERSION_MAJOR	1
 #define VERSION_MINOR	5
-#define VERSION_BUILD	0106
+#define VERSION_BUILD	3105
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   360
@@ -1064,7 +1064,16 @@ void AboutProcessEvent(SDL_Event evt)
 	if (evt.type == SDL_KEYDOWN)
 	{
 		GameStart();
+	} else
+	if (evt.type == SDL_MOUSEBUTTONDOWN) // TOUCH
+	{
+		if(evt.button.button==SDL_BUTTON_LEFT)
+		{	
+			GameStart();
+		}
 	}
+	
+
 }
 
 int main(int argc, char * argv[])
