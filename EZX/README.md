@@ -60,6 +60,13 @@ MPKG:
 tar -cvzf ColorLines.mpkg --numeric-owner --owner=2000 --group=233 ColorLines
 ```
 
+Automatic:
+
+```sh
+make dist
+```
+
+
 ## Controls
 
  - Joystick - directions
@@ -67,10 +74,14 @@ tar -cvzf ColorLines.mpkg --numeric-owner --owner=2000 --group=233 ColorLines
  - Minus - new game
  - Hangup - back to menu
  - Ring - about
+ - Mod + Minus - vol down
+ - Mod + Plus - vol up
 
 ## Features
 
  - Game save your score automatically
+ - Music
+ - Animations
 
 ## Tested devices
 

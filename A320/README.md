@@ -17,13 +17,14 @@ Use usb mini cable, or just copy ColorLines folder to SD card
  - Joystick - directions
  - A - select
  - Y - new game
+ - X - pause music
  - Select - back to menu
  - Start - about
 
 ## Features
 
  - Game save your score automatically
- - Music
+ - Music and effects
 
 ## Screenshots
 

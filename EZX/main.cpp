@@ -9,9 +9,7 @@ Color Lines SDL
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <iostream>
 #include <fstream>
-#include <string.h>
 #include <SDL.h>
 #include <SDL_mixer.h>
 
@@ -22,8 +20,8 @@ void GameStart();
 void AboutStart();
 
 #define VERSION_MAJOR	1
-#define VERSION_MINOR	3
-#define VERSION_BUILD	3005
+#define VERSION_MINOR	5
+#define VERSION_BUILD	3105
 
 #define SCREEN_WIDTH	320
 #define SCREEN_HEIGHT   240
@@ -64,6 +62,7 @@ SDL_Surface *g_pSprites = NULL;
 SDL_Surface *g_pFont = NULL;
 Mix_Music *g_Music;
 Mix_Music *g_Intro;
+Mix_Chunk *g_Win;
 Mix_Chunk *g_Bouncing;
 enum GameMode g_GameMode = GAMEMODE_MENU;
 int g_okQuit = 0;
@@ -75,6 +74,9 @@ int g_TileCursorX, g_TileCursorY;
 int g_okShowTileCursor = 0;
 int g_okTileCursorPhase = 0;
 int g_TileSelectX, g_TileSelectY;
+int g_Volume = 70;
+double g_ScoreMult = 0;
+bool g_PlayWin = true;
 
 enum SpriteEnum
 {
@@ -96,7 +98,11 @@ enum SpriteEnum
 	SPRITE_NEXT_CYAN = 15,
 	SPRITE_NEXT_MAGENTA = 16,
 	SPRITE_NEXT_BROWN = 17,
-	SPRITECOUNT = 18
+	SPRITE_COLUMN = 18,
+	SPRITE_KING_LOSE = 19,
+	SPRITE_PRETENDER_WIN = 20,
+	SPRITE_BUTTON = 21,
+	SPRITECOUNT = 22
 };
 
 int SPRITECOORDS[SPRITECOUNT * 4] =
@@ -119,6 +125,10 @@ int SPRITECOORDS[SPRITECOUNT * 4] =
 	 61, 121, 11, 10,
 	 73, 121, 11, 10,
 	 85, 121, 11, 10,
+	216,  96, 60, 98,
+	139,   1, 70, 94,
+	210,   1, 66, 94,
+	145, 144, 70, 50,
 };
 
 void DrawSprite(int sprite, int x, int y)
@@ -223,14 +233,28 @@ void DrawGameScreen()
 	int i, j, tile;
 	SDL_Rect rc;
 	char buf[10];
+	int kingSprite;
+	int pretenderSprite;
+
+	if (g_Score <= g_KingScore)
+	{
+		kingSprite = SPRITE_KING;
+		pretenderSprite = SPRITE_PRETENDER;
+	}
+	else
+	{
+		kingSprite = SPRITE_KING_LOSE;
+		pretenderSprite = SPRITE_PRETENDER_WIN;
+	}
+	
 
 	// Clear screen
 	rc.x = rc.y = 0;  rc.w = SCREEN_WIDTH; rc.h = SCREEN_HEIGHT;
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 0,0,0));
 
 	// Draw board and sprites
-	DrawSprite(SPRITE_KING, -24, 75);
-	DrawSprite(SPRITE_PRETENDER, SCREEN_WIDTH - 42, 75);
+	DrawSprite(kingSprite, -24, 75);
+	DrawSprite(pretenderSprite, SCREEN_WIDTH - 42, 75);
 	rc.x = POSX_BOARD_LEFT;  rc.y = POSY_BOARD_TOP;
 	rc.w = rc.h = 24 * 9 + 4;
 	SDL_FillRect(g_pSurface, &rc, SDL_MapRGB(g_pSurface->format, 173,170,173));
@@ -382,48 +406,6 @@ int LoadScore()
 	else return 100;
 }
 
-bool SaveGame()
-{
-	char cwd[PATH_MAX];
-
-   	if (getcwd(cwd, sizeof(cwd)) != NULL) 
-	{
-    	ofstream save;
-
-  		save.open(strcat(cwd, "/save.file"));
-		save << g_Score << endl;
-		save.close();
-	}
-	else return false;
-
-	return true;
-}
-
-bool LoadGame()
-{
-	char cwd[PATH_MAX];
-	int score = 0;
-
-   	if (getcwd(cwd, sizeof(cwd)) != NULL) 
-	{	
-		ifstream save;
-
-  		save.open(strcat(cwd, "/save.file"));
-		
-		if(save.is_open())
-		{
-  			save >> score;
-  			save.close();
-
-			g_Score = score;
-			GameStart();
-			return true;
-		}
-		else return false;
-   	} 
-	else return false;
-}
-
 void Init()
 {	
 	// Clear board
@@ -431,8 +413,11 @@ void Init()
 
 	// Clear score
 	g_Score = 0;
+	g_KingScore = LoadScore();
+	g_ScoreMult = g_KingScore/100.0;
 
 	//Start music
+	Mix_VolumeMusic(g_Volume);
 	Mix_PlayMusic(g_Music, MAX_INT);
 }
 
@@ -440,25 +425,24 @@ void GameStart()
 {
     if (g_GameMode != GAMEMODE_ABOUT)
     {
-	g_KingScore = LoadScore();
-	g_TileCursorX = g_TileCursorY = 4;  // Cursor to center of the board
-	g_okShowTileCursor = 0;  // Hide cursor
-	g_TileSelectX = g_TileSelectY = -1;  // No selection
+		g_TileCursorX = g_TileCursorY = 4;  // Cursor to center of the board
+		g_okShowTileCursor = 0;  // Hide cursor
+		g_TileSelectX = g_TileSelectY = -1;  // No selection
 
-	g_NextColors[0] = rand() % BALLCOLORCOUNT + 1;
-	g_NextColors[1] = rand() % BALLCOLORCOUNT + 1;
-	g_NextColors[2] = rand() % BALLCOLORCOUNT + 1;
+		g_NextColors[0] = rand() % BALLCOLORCOUNT + 1;
+		g_NextColors[1] = rand() % BALLCOLORCOUNT + 1;
+		g_NextColors[2] = rand() % BALLCOLORCOUNT + 1;
 
-	DrawGameScreen();
-	SDL_Flip(g_pSurface);
-	SDL_Delay(100);
+		DrawGameScreen();
+		SDL_Flip(g_pSurface);
+		SDL_Delay(100);
 
-	// Put first three random balls
-	GamePutThreeRandomBalls();
+		// Put first three random balls
+		GamePutThreeRandomBalls();
 
-	g_okShowTileCursor = 1;  // Show cursor
+		g_okShowTileCursor = 1;  // Show cursor
 
-	g_GameMode = GAMEMODE_PLAY;
+		g_GameMode = GAMEMODE_PLAY;
     }
     else
     {
@@ -749,6 +733,14 @@ void GameProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
+		case SDLK_c:	//MINUS + MOD
+			if (g_Volume > 0)
+				g_Volume -= 10;
+			break;
+		case SDLK_d:		//PLUS + MOD
+			if (g_Volume < 130)
+				g_Volume += 10;
+			break;
 		case SDLK_MINUS:	// MINUS
 			Init();
 			GameStart();
@@ -926,17 +918,7 @@ void AboutProcessEvent(SDL_Event evt)
 {
 	if (evt.type == SDL_KEYDOWN)
 	{
-		switch (evt.key.keysym.sym)
-		{
-		case SDLK_ESCAPE:  // HANGUP
-		case SDLK_PLUS:   // PLUS
-		case SDLK_MINUS:	// MINUS
-		case SDLK_RETURN:	// ENTER
-			GameStart();
-			break;
-		default:  // Do nothing
-			break;
-		}
+		GameStart();
 	}
 }
 
@@ -959,7 +941,8 @@ int main(int argc, char * argv[])
 	Mix_OpenAudio(22050,AUDIO_U8,2,512);
 	g_Music = Mix_LoadMUS("ColorLinesData/music.wav");
 	g_Intro = Mix_LoadMUS("ColorLinesData/intro.wav");
-	Mix_VolumeMusic(40);
+	g_Win = Mix_LoadWAV("ColorLinesData/win.wav");
+	g_Bouncing = Mix_LoadWAV("ColorLinesData/bouncing.wav");
 
 	// Prepare screen surface
 	g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
@@ -980,10 +963,23 @@ int main(int argc, char * argv[])
 
 	MenuStart();
 
+	Mix_VolumeMusic(g_Volume);
 	Mix_PlayMusic(g_Intro, 1);
 
 	while (!g_okQuit)
-	{
+	{	
+		if (g_GameMode != GAMEMODE_MENU)
+		{
+			if (g_KingScore < g_Score && g_PlayWin)
+			{	
+				Mix_VolumeChunk(g_Win, g_Volume/2);
+				Mix_PlayChannel(-1, g_Win, 1);
+				g_PlayWin = false;
+			}
+
+			Mix_VolumeMusic(g_Volume);
+		}
+
 		while (SDL_PollEvent(&evt))
 		{
 			if (evt.type == SDL_QUIT)

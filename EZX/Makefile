@@ -16,7 +16,7 @@ CXXFLAGS=	-pipe `sdl-config --cflags` -DQWS -fno-exceptions -fno-rtti -Wall -W -
 INCPATH	=	-I $(SDK_INC_DIR) -I $(SDK_SDL_INC_DIR)
 LINK	=	arm-linux-gnu-g++
 LFLAGS	=	`sdl-config --libs`
-LIBS	=	$(SUBLIBS) -L $(SDK_EZX_LIB_DIR) -lSDL -lSDLmain -lezxappbase -lpthread -lz -lfreetype -lSDL_mixer -lmad -lvorbisfile -lvorbis -logg -lpng -ljpeg
+LIBS	=	$(SUBLIBS) -L $(SDK_EZX_LIB_DIR) -lSDL -lSDLmain -lezxappbase -lpthread -lz -lSDL_mixer
 MOC	=	$(QTDIR)/bin/moc
 UIC	=	$(QTDIR)/bin/uic
 

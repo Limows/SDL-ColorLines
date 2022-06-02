@@ -18,6 +18,12 @@ make
 
 ## Create packages for Linux distributions
 
+Tar:
+
+```sh
+make dist
+```
+
 ## Controls
 
  - Cursor keys - directions
@@ -31,6 +37,8 @@ make
 
  - Game save your score automatically
  - Music
+ - Animations
+ - Mouse controls
 
 ## Tested devices
 

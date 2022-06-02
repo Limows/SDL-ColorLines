@@ -34,11 +34,15 @@ Use usb mini cable, or just copy ColorLines folder to SD card
  - X - pause music
  - Select - back to menu
  - Start - about
+ - Left shift - vol down
+ - Right shift - vol up
 
 ## Features
 
  - Game save your score automatically
  - Music
+ - Animations
+ - Native resolution
 
 ## Screenshots
 
