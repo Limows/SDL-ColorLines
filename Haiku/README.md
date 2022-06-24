@@ -7,16 +7,21 @@ SDL Haiku and BeOS version
 Haiku Recipe:
 
 ```sh
-pkgman install libsdl*1.2-dev
+pkgman install libsdl-dev
+pkgman install sdl_mixer-dev
 
 cd ~/Projects/
 git clone https://github.com/Limows/SDL-ColorLines
-cd SDL-ColorLines/X86-Linux/
+cd SDL-ColorLines/Haiku/
 make clean
 make
 ```
 
 ## Create package
+
+```sh
+package create -C ./ColorLines colorlines-x86_gcc2.hpkg
+```
 
 ## Controls
 
