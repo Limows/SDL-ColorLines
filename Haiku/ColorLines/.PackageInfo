@@ -1,0 +1,26 @@
+name		ColorLines
+version		1.5-2106
+architecture	x86_gcc2
+summary		"SDL-ColorLines Haiku port"
+description	"Color Lines is a DOS game written in 1992. Goal of the game is to core as many points as possible by matching balls in lines of 5 or more"
+packager		"Limows <limowski256@gmail.com>"
+vendor		"Limows"
+licenses {
+	"MIT"
+}
+copyrights {
+	"Copyright (C) 2012 by nzeemin"
+	"Copyright (C) 2022 by Limows"
+}
+provides {
+	ColorLines = 1.5-2106
+	app:ColorLines
+}
+requires {
+	haiku
+	lib:libsdl
+	lib:libsdl_mixer
+}
+urls {
+	"https://github.com/limows/SDL-ColorLines"
+}

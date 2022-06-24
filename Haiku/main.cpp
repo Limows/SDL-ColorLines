@@ -14,6 +14,8 @@ Color Lines SDL
 #include <string.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+#include <FindDirectory.h>
+#include <libgen.h>
 
 using namespace std;
 
@@ -23,7 +25,7 @@ void AboutStart();
 
 #define VERSION_MAJOR	1
 #define VERSION_MINOR	5
-#define VERSION_BUILD	3105
+#define VERSION_BUILD	2106
 
 #define SCREEN_WIDTH	480
 #define SCREEN_HEIGHT   360
@@ -404,16 +406,14 @@ void SaveScore(int score)
 	char cwd[PATH_MAX];
 
 	if (g_Score > g_KingScore)
-	{
-   		if (getcwd(cwd, sizeof(cwd)) != NULL) 
-		{
-    		ofstream save;
+	{	
+		ofstream save;
+		
+		find_directory(B_USER_SETTINGS_DIRECTORY, -1, false, cwd, sizeof(cwd));
 
-  			save.open(strcat(cwd, "/score.file"));
-  			save << score << endl;
-  			save.close();
-   		} 
-		else return;
+  		save.open(strcat(cwd, "/ColorLines/score.file"));
+  		save << score << endl;
+  		save.close();
 	}
 	else return;
 }
@@ -422,23 +422,20 @@ int LoadScore()
 {
 	char cwd[PATH_MAX];
 	int score = 100;
+	ifstream save;
+		
+	find_directory(B_USER_SETTINGS_DIRECTORY, -1, false, cwd, sizeof(cwd));
 
-   	if (getcwd(cwd, sizeof(cwd)) != NULL) 
-	{	
-		ifstream save;
+  	save.open(strcat(cwd, "/ColorLines/score.file"));
 
-  		save.open(strcat(cwd, "/score.file"));
+	if(save.is_open())
+	{
+  		save >> score;
+  		save.close();
+	}
+	else return 100;
 
-		if(save.is_open())
-		{
-  			save >> score;
-  			save.close();
-		}
-		else return 100;
-
-		if (score > 100) return score;
-		else return 100;
-   	} 
+	if (score > 100) return score;
 	else return 100;
 }
 
@@ -958,16 +955,19 @@ void MenuStart()
 	SDL_Surface *tempSurface;
 	SDL_Surface *pSurfaceTitle;
 	SDL_Rect src, dest;
+	char cwd[PATH_MAX];
 	int vAlign = (SCREEN_HEIGHT - 240)/2;
 	int hAlign = (SCREEN_WIDTH - 320)/2;
 	int vTextAlign = vAlign + 34;
-
+	
+	cwd = g_cwd;
+	
 	//Clear screen
 	//SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, 0);
 	SDL_FillRect(g_pSurface, NULL, 0x000000);
 
 	// Show title screen
-	tempSurface = SDL_LoadBMP("ColorLinesData/title.bmp");
+	tempSurface = SDL_LoadBMP(strcat(cwd, "/ColorLinesData/title.bmp"));
 
 	if (tempSurface != NULL)
 	{
@@ -996,12 +996,15 @@ void AboutStart()
 	SDL_Surface *pSurfaceTitle;
 	SDL_Rect src, dest;
 	char buffer[20];
+	char cwd[PATH_MAX];
 	int vAlign = (SCREEN_HEIGHT - 240)/2;
 	int hAlign = (SCREEN_WIDTH - 320)/2;
 	int vTextAlign = vAlign + 34;
-
+	
+	cwd = g_cwd;
+	
 	// Show about screen
-	tempSurface = SDL_LoadBMP("ColorLinesData/about.bmp");
+	tempSurface = SDL_LoadBMP(strcat(cwd, "ColorLinesData/about.bmp"));
 
 	if (tempSurface != NULL)
 	{
@@ -1082,6 +1085,11 @@ int main(int argc, char * argv[])
 	SDL_Event evt;
 	SDL_Surface *tempSurface;
 	char cwd[PATH_MAX];
+	
+	sprintf(g_cwd, dirname(argv[0]));
+	cwd = g_cwd;
+	
+	if(chdir(cwd) == -1) return 251 //Unable to change dir
 
 	// Init randomizer
 	srand(SDL_GetTicks());
@@ -1095,10 +1103,16 @@ int main(int argc, char * argv[])
 
 	// Setup audio mode
 	Mix_OpenAudio(44100,AUDIO_S16,2,512);
-	g_Music = Mix_LoadMUS("ColorLinesData/music.ogg");
-	g_Intro = Mix_LoadMUS("ColorLinesData/intro.ogg");
-	g_Win = Mix_LoadWAV("ColorLinesData/win.wav");
-	g_Bouncing = Mix_LoadWAV("ColorLinesData/bouncing.wav");
+	g_Music = Mix_LoadMUS(strcat(cwd, "/ColorLinesData/music.ogg"));
+	cwd = g_cwd;
+	g_Intro = Mix_LoadMUS(strcat(cwd, "/ColorLinesData/intro.ogg"));
+	cwd = g_cwd;
+	g_Win = Mix_LoadWAV(strcat(cwd, "/ColorLinesData/win.wav"));
+	cwd = g_cwd;
+	g_Bouncing = Mix_LoadWAV(strcat(cwd, "/ColorLinesData/bouncing.wav"));
+	cwd = g_cwd;
+	
+	printf(cwd);
 
 	// Prepare screen surface
 	g_pSurface = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
@@ -1106,13 +1120,14 @@ int main(int argc, char * argv[])
 	SDL_ShowCursor(SDL_ENABLE);
 
 	// Load font
-	tempSurface = SDL_LoadBMP("ColorLinesData/font.bmp");
+	tempSurface = SDL_LoadBMP(strcat(cwd, "/ColorLinesData/font.bmp"));
 	if (tempSurface == NULL) return 252;  // Unable to load bitmap
 	g_pFont = SDL_DisplayFormat(tempSurface);
 	SDL_FreeSurface(tempSurface);
-
+	cwd = g_cwd;
+	
 	// Load sprites
-	tempSurface = SDL_LoadBMP("ColorLinesData/sprites.bmp");
+	tempSurface = SDL_LoadBMP(strcat(cwd, "/ColorLinesData/sprites.bmp"));
 	if (tempSurface == NULL) return 252;  // Unable to load bitmap
 	g_pSprites = SDL_DisplayFormat(tempSurface);
 	SDL_FreeSurface(tempSurface);
