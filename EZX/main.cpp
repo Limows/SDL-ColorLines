@@ -74,7 +74,7 @@ int g_TileCursorX, g_TileCursorY;
 int g_okShowTileCursor = 0;
 int g_okTileCursorPhase = 0;
 int g_TileSelectX, g_TileSelectY;
-int g_Volume = 70;
+int g_Volume = 50;
 double g_ScoreMult = 0;
 bool g_PlayWin = true;
 
@@ -733,11 +733,11 @@ void GameProcessEvent(SDL_Event evt)
 	{
 		switch (evt.key.keysym.sym)
 		{
-		case SDLK_c:	//MINUS + MOD
+		case SDLK_d:	//MINUS + MOD
 			if (g_Volume > 0)
 				g_Volume -= 10;
 			break;
-		case SDLK_d:		//PLUS + MOD
+		case SDLK_c:		//PLUS + MOD
 			if (g_Volume < 130)
 				g_Volume += 10;
 			break;
@@ -964,7 +964,7 @@ int main(int argc, char * argv[])
 	MenuStart();
 
 	Mix_VolumeMusic(g_Volume);
-	Mix_PlayMusic(g_Intro, 1);
+	Mix_PlayMusic(g_Intro, 0);
 
 	while (!g_okQuit)
 	{	
@@ -973,7 +973,7 @@ int main(int argc, char * argv[])
 			if (g_KingScore < g_Score && g_PlayWin)
 			{	
 				Mix_VolumeChunk(g_Win, g_Volume/2);
-				Mix_PlayChannel(-1, g_Win, 1);
+				Mix_PlayChannel(-1, g_Win, 0);
 				g_PlayWin = false;
 			}
 
