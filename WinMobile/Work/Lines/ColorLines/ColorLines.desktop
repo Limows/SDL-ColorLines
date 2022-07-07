@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name = Color Lines
+Version = 1.5
+Comment = SDL version of Color Lines game, ported from Dingoo A320
+Exec = ColorLines.elf
+Icon = ibig.png
+Terminal=false
+Type = Application
+Categories=Game;
+Name[en_GB] = Color Lines
+Name[ru_RU] = Цветные Линии
